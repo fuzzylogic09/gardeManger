@@ -7,6 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Garde-Manger — Recettes depuis vos placards</title>
+<link rel="manifest" href="manifest.json">
+<!-- PWA / App icons (base64 intégré) -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Garde-Manger">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADbklEQVR42u3dP3YTMRCAcVsvLQ0HCOkoQk0RTsSJOFEa6jTpyAVouABF3uPxwGs7tv6MRr+v9u5I2m9ntFrZ3t8+3O+AQxRDAHKAHCAHyAFygBwgB8gBcoAcADlADpAD5FiVl8cnckDmwNvTxsDkQQ6QY+bZxqjkQQ6QA+TI+gQ7pLKQA+SYOW2MSh5llqERuj/7UN94+3uMPnz5tGboI6J0bljcsiKFDG9YoMyx1fMOt0vA0BGSR/QJaedEGiR0kORRFuyz0DOVlZQFJdSFv6w71jnyV6WLWzJejsTz0Ah+XNOGG7dd09CvZxtSYq7vSImZNpKF7u96lYgRJ6Q9h7Jn6G461urFYDlWW/jq4EfF9g8uK6utcbUOWvf8QR9lE89F2vlR/cwWwaZ5q9JfOItg09PO4xK5ewOnb7PMHJtmuJJef6HTlhWvTAcSd5vgLu9qWF3/ks85ZHtlRUEhR71L8vL41Oc6DQxNDsWlYX5qJ3GU/RyKyBE7l/4JhjWXz8/PW6MaE3Qn2MocVGHIjjJ7SGcK3Xmxv0x09wj9+pluLbSHdMrQffywh3RM6P/9uCz0n/O0aHnoV/ZZQ7fY5tMiEYZ78TZKlJ6h/4lVJXSL9u/9XTkme1oBOUAOkAPkADlADkOALZq/sv/+9b1Rvp7P3372D9pqEYwTCSwpzJiLnmNbmMGPTmXlYLvf3X10Ra/h14/nIfWlMCM+B8ewQ/4ozOBHWzmYkdKP0rMnmGtUrZCipRyeXbM+2cocIAfiyHFw3QZzjWpJ0xNmTFZW+DH1SJaUvWJGFW4S9w2eVjBz5kA33rQgdvKlv8yxqBnnfJ4ci5pxzlHkWNeMk8eSA5t+kAPKCsgBcoAcIAfIAXKAHCAHyIGF2Xp3T47MV/fKY8mxtB/HjyLHun6c/LxtgvKHzAFygBwgB8gBcoAcIAfIAXIA5AA5QA6QA+QAOUAOkAPkADkAcoAcIAfIAXKAHCAHyAFygBwAOUAOkAPkADkwvRx1f4cKccZf5gA5MEoOlSVfTamZOfiRzIzKZYUfmcyoP+fgRxozmkxI+ZHDjFZPK/xIYMZut9vfPtw3DbD1P+mIf781lwPzYhEM5AA5QA6QA+QAOUAOkAPkADkAcoAcIAfIAXKAHCAHyAFygBwAOUAOkAPkADlADpADs/IbpGx26ZjwYisAAAAASUVORK5CYII=">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAv0lEQVR42mOUs9JmoCVgYqAxoJoFD49eGXw+wOooPIJYpVioGyxwEXlrHQI+eHj0ClwRLkFMBZjilMYBph1oIkx4dGKGAFZBOiVTeWsdiNvRXEBRHGAGC6YsI62LCvRkeipTiFdBnTyzPj+4aTb9Hb44oMR0BgYGXgX1U5lCBCL584ObZFuAVS8LkeqIB6cyhcymv4OQtC3sIME1dOoDTECrIIKYC0+vQzmIRi0YlBZgloXkpVG61gejkTzwFgAA+YNNdblECVgAAAAASUVORK5CYII=">
 <!-- Firebase SDK compat (chargé de façon synchrone avant tout le reste) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -2050,8 +2058,35 @@ function connectToHousehold(code){
 document.getElementById('fbConnectBtn').addEventListener('click', function(){
   var cfgStr = document.getElementById('fbConfigInput').value.trim();
   if(!cfgStr){ showToast('Collez d\'abord la configuration Firebase'); return; }
-  var code = state.settings.householdCode || generateHouseholdCode();
-  connectToHousehold(code);
+  // Valider la config avant de proposer le choix
+  try{ parseFirebaseConfig(cfgStr); } catch(e){ showToast('Configuration Firebase invalide : ' + e.message); return; }
+  // Afficher le choix Créer / Rejoindre
+  showConfirm({
+    title:'Connecter Firebase',
+    message:'Voulez-vous créer un nouveau foyer (un code sera généré) ou rejoindre un foyer existant (vous entrerez un code) ?',
+    confirmLabel:'Créer un nouveau foyer',
+    danger:false
+  }, function(){
+    // Créer
+    var code = generateHouseholdCode();
+    initFirebase(cfgStr, code);
+    setTimeout(pushToFirestore, 1200);
+  });
+  // Ajouter un 3e bouton "Rejoindre" en injectant temporairement dans la confirm sheet
+  var okBtn = document.getElementById('confirmOkBtn');
+  var joinBtn = document.createElement('button');
+  joinBtn.className = 'btn btn-secondary';
+  joinBtn.style.flex = '1';
+  joinBtn.textContent = 'Rejoindre un foyer';
+  joinBtn.addEventListener('click', function(){
+    closeConfirm();
+    // Sauvegarder la config puis ouvrir la sheet de jointure
+    state.settings.firebaseConfig = cfgStr;
+    persistSettings();
+    document.getElementById('fbConfigInput').value = cfgStr;
+    openJoinSheet();
+  });
+  okBtn.parentNode.insertBefore(joinBtn, okBtn);
 });
 
 document.getElementById('fbShareSheetBtn').addEventListener('click', function(){ openJoinSheet(); });
