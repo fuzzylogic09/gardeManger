@@ -2252,6 +2252,24 @@ document.getElementById('importJsonFile').addEventListener('change', function(e)
    INITIALISATION
 ========================================================= */
 function init(){
+  // ── Service Worker (PWA uniquement) ──────────────────────
+  if('serviceWorker' in navigator){
+    // Utiliser ./ comme scope pour fonctionner dans n'importe quel sous-répertoire GitHub Pages
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(function(reg){
+        reg.addEventListener('updatefound', function(){
+          var nw = reg.installing;
+          if(!nw) return;
+          nw.addEventListener('statechange', function(){
+            if(nw.state === 'installed' && navigator.serviceWorker.controller){
+              showToast('Mise à jour disponible — relancez l\'app');
+            }
+          });
+        });
+      })
+      .catch(function(e){ console.warn('SW registration failed:', e); });
+  }
+
   fillSelectOptions();
   loadFromStorage();
   syncSettingsFields();
@@ -2260,7 +2278,11 @@ function init(){
   renderRecipes();
   renderFavorites();
   analysisEmptyState();
-  switchScreen('pantry');
+
+  // Deep link via ?screen=
+  var urlScreen = new URLSearchParams(window.location.search).get('screen');
+  var validScreens = ['pantry','library','recipes','analysis','settings'];
+  switchScreen(urlScreen && validScreens.indexOf(urlScreen) !== -1 ? urlScreen : 'pantry');
 
   // Auto-connexion Firebase si déjà configuré
   if(state.settings.firebaseConfig && state.settings.householdCode){

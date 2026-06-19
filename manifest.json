@@ -2,8 +2,8 @@
   "name": "Garde-Manger",
   "short_name": "Garde-Manger",
   "description": "Gérez vos aliments et obtenez des recettes IA à partir de votre garde-manger.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#1E3A2B",
   "theme_color": "#1E3A2B",
@@ -70,7 +70,7 @@
       "name": "Mon garde-manger",
       "short_name": "Cuisine",
       "description": "Voir mes aliments",
-      "url": "/?screen=pantry",
+      "url": "./?screen=pantry",
       "icons": [
         {
           "src": "icons/icon-96x96.png",
@@ -82,7 +82,7 @@
       "name": "Trouver des recettes",
       "short_name": "Recettes",
       "description": "Obtenir des idées de recettes",
-      "url": "/?screen=recipes",
+      "url": "./?screen=recipes",
       "icons": [
         {
           "src": "icons/icon-96x96.png",
