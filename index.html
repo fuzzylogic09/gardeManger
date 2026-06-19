@@ -7,6 +7,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Garde-Manger — Recettes depuis vos placards</title>
+<!-- Firebase SDK compat (chargé de façon synchrone avant tout le reste) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+  // Fallback CDN si gstatic indisponible
+  if(typeof firebase === 'undefined'){
+    document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-app-compat.min.js"><\/script>');
+    document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.7.1/firebase-firestore-compat.min.js"><\/script>');
+  }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -162,7 +172,19 @@ input,select,textarea{font-family:inherit; color:var(--text);}
 }
 .helper{color:var(--text-muted); font-size:13px; line-height:1.5;}
 
-/* ---------- Search ---------- */
+/* ---------- Bannière Firebase foyer ---------- */
+.fb-banner{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:var(--primary-light); color:#fff; padding:9px 16px; font-size:12.5px; cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.fb-banner .fb-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0; background:#6fcf97;}
+.fb-banner .fb-dot.off{background:#bdc3c7;}
+.fb-banner .fb-code-badge{
+  font-family:var(--font-mono); font-weight:700; letter-spacing:.1em; font-size:13px;
+  background:rgba(255,255,255,.15); padding:3px 10px; border-radius:999px;
+}
+.fb-banner .fb-action{font-size:12px; opacity:.75; white-space:nowrap;}
 .search-row{display:flex; gap:8px; margin-bottom:10px;}
 .search-input{
   flex:1; border:1.5px solid var(--border); border-radius:12px; padding:10px 12px;
@@ -342,6 +364,14 @@ details.help a{color:var(--primary); font-weight:600;}
     <div class="sub" id="appbarSub">Ce qu'il y a dans vos placards</div>
   </div>
 
+  <!-- ===== FIREBASE BANNER ===== -->
+  <div class="fb-banner" id="fbBanner" onclick="openJoinSheet()">
+    <span class="fb-dot off" id="fbBannerDot"></span>
+    <span id="fbBannerText" style="flex:1;">Aucun foyer connecté</span>
+    <span id="fbBannerCode" class="fb-code-badge" style="display:none;"></span>
+    <span class="fb-action">Partager / Rejoindre →</span>
+  </div>
+
   <!-- ===== SCREENS ===== -->
   <div class="screens">
 
@@ -455,11 +485,10 @@ details.help a{color:var(--primary); font-weight:600;}
           <div style="background:var(--bg); border-radius:12px; padding:14px; margin-bottom:12px; text-align:center;">
             <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:6px;">Code de votre foyer</div>
             <div id="fbCodeDisplay" style="font-family:var(--font-mono); font-size:28px; font-weight:700; letter-spacing:.18em; color:var(--primary);"></div>
-            <button class="btn btn-secondary btn-sm" id="fbCopyCodeBtn" style="margin-top:8px;">Copier le code</button>
           </div>
           <div class="btn-row">
+            <button class="btn btn-accent btn-sm" id="fbShareSheetBtn" style="flex:1;">Partager / Rejoindre</button>
             <button class="btn btn-secondary btn-sm" id="fbNewHouseholdBtn">Nouveau foyer</button>
-            <button class="btn btn-accent btn-sm" id="fbJoinBtn">Rejoindre un foyer</button>
           </div>
         </div>
 
@@ -569,10 +598,46 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- ===== SHEET: rejoindre / partager un foyer ===== -->
+  <div class="sheet-backdrop" id="joinSheetBackdrop">
+    <div class="sheet" id="joinSheet">
+      <div class="sheet-handle"></div>
+      <h3>Partager ou rejoindre un foyer</h3>
+
+      <!-- Section : votre code -->
+      <div id="joinShareSection" style="display:none;">
+        <p class="helper" style="margin:0 0 10px;">Partagez ce code avec les personnes qui doivent rejoindre votre foyer :</p>
+        <div style="background:var(--primary); border-radius:16px; padding:18px; text-align:center; margin-bottom:14px;">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#cfd8cf; margin-bottom:8px;">Votre code de foyer</div>
+          <div id="joinDisplayCode" style="font-family:var(--font-mono); font-size:34px; font-weight:700; letter-spacing:.22em; color:white; margin-bottom:12px;"></div>
+          <button class="btn btn-accent" id="joinCopyBtn" style="width:100%;">Copier le code</button>
+        </div>
+        <div style="text-align:center; margin-bottom:18px;">
+          <button class="btn btn-secondary btn-sm" id="joinShareBtn" style="width:100%;">
+            Partager via SMS / WhatsApp…
+          </button>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border); margin:0 0 18px;">
+      </div>
+
+      <!-- Section : rejoindre -->
+      <p class="helper" style="margin:0 0 10px;">Entrez le code d'un foyer existant pour le rejoindre :</p>
+      <div style="display:flex; gap:8px; margin-bottom:6px; align-items:center;">
+        <input type="text" id="joinCodeInput"
+          maxlength="6"
+          style="flex:1; border:2px solid var(--border); border-radius:14px; padding:14px 16px; font-family:var(--font-mono); font-size:22px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; text-align:center; background:var(--bg);"
+          placeholder="ABCD12">
+      </div>
+      <p class="helper" id="joinCodeHint" style="margin:0 0 16px; min-height:18px;"></p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="joinCancelBtn" style="flex:1">Annuler</button>
+        <button class="btn btn-primary" id="joinConfirmBtn" style="flex:1">Rejoindre</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 (function(){
 "use strict";
@@ -1821,20 +1886,47 @@ function setFbStatusUI(status, label){
   var lbl  = document.getElementById('fbSyncLabel');
   if(status === 'connected'){
     pill.textContent = 'Connecté'; pill.className = 'status-pill status-ok';
+    updateFbBanner(true, state.settings.householdCode);
   } else if(status === 'syncing'){
     pill.textContent = 'Synchronisation…'; pill.className = 'status-pill status-off';
   } else {
     pill.textContent = 'Non connecté'; pill.className = 'status-pill status-off';
+    updateFbBanner(false, null);
   }
   if(lbl) lbl.textContent = label || '';
 }
 
+function parseFirebaseConfig(input){
+  if(typeof input === 'object' && input !== null) return input;
+  var str = (input || '').trim();
+  // Retirer "const/let/var firebaseConfig = " et le ";" final si présent
+  str = str.replace(/^(?:const|let|var)\s+\w+\s*=\s*/, '').replace(/;?\s*$/, '').trim();
+  // Extraire uniquement l'objet entre { ... }
+  var start = str.indexOf('{'), end = str.lastIndexOf('}');
+  if(start === -1 || end === -1) throw new Error('Aucun objet { } trouvé');
+  str = str.slice(start, end + 1);
+  // Essai JSON direct
+  try{ return JSON.parse(str); } catch(e){}
+  // Convertir les clés non-quotées (format JS) en JSON valide
+  var jsonStr = str
+    .replace(/\/\/[^\n]*/g, '')           // supprimer commentaires //
+    .replace(/\/\*[\s\S]*?\*\//g, '')      // supprimer commentaires /* */
+    .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":') // quoter les clés
+    .replace(/'/g, '"');                    // remplacer apostrophes par guillemets
+  try{ return JSON.parse(jsonStr); }
+  catch(e){ throw new Error('Format non reconnu — vérifiez la config'); }
+}
+
 function initFirebase(configStr, code){
+  if(typeof firebase === 'undefined'){
+    showToast('SDK Firebase non chargé — vérifiez votre connexion internet');
+    return;
+  }
   var config;
   try{
-    config = (typeof configStr === 'string') ? JSON.parse(configStr) : configStr;
+    config = parseFirebaseConfig(configStr);
   } catch(e){
-    showToast('Configuration Firebase invalide (JSON malformé)');
+    showToast('Configuration Firebase invalide : ' + e.message);
     return;
   }
   try{
@@ -1849,7 +1941,7 @@ function initFirebase(configStr, code){
     document.getElementById('fbHouseholdSection').style.display = '';
     document.getElementById('fbCodeDisplay').textContent = code;
     state.settings.householdCode = code;
-    state.settings.firebaseConfig = typeof configStr === 'string' ? configStr : JSON.stringify(configStr);
+    state.settings.firebaseConfig = JSON.stringify(config); // normalisé en JSON propre
     persistSettings();
     startFbListener(code);
     showToast('Connecté au foyer ' + code);
@@ -1922,11 +2014,11 @@ function connectToHousehold(code){
 
   var docRef;
   try{
-    var cfg = JSON.parse(cfgStr);
+    var cfg = parseFirebaseConfig(cfgStr);
     if(state.fbApp) try{ state.fbApp.delete(); }catch(e2){}
     state.fbApp = firebase.initializeApp(cfg, 'gm-check-' + Date.now());
     docRef = firebase.firestore(state.fbApp).collection(FB_COLLECTION).doc(code);
-  } catch(e){ showToast('Configuration Firebase invalide'); return; }
+  } catch(e){ showToast('Configuration Firebase invalide : ' + (e.message||'')); return; }
 
   docRef.get().then(function(snap){
     if(snap.exists){
@@ -1962,15 +2054,7 @@ document.getElementById('fbConnectBtn').addEventListener('click', function(){
   connectToHousehold(code);
 });
 
-document.getElementById('fbCopyCodeBtn').addEventListener('click', function(){
-  var code = state.settings.householdCode;
-  if(!code) return;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(code).then(function(){ showToast('Code copié : ' + code); });
-  } else {
-    showToast('Code : ' + code);
-  }
-});
+document.getElementById('fbShareSheetBtn').addEventListener('click', function(){ openJoinSheet(); });
 
 document.getElementById('fbNewHouseholdBtn').addEventListener('click', function(){
   showConfirm({
@@ -1987,10 +2071,96 @@ document.getElementById('fbNewHouseholdBtn').addEventListener('click', function(
   });
 });
 
-document.getElementById('fbJoinBtn').addEventListener('click', function(){
-  var code = prompt('Entrez le code du foyer (6 caractères) :');
-  if(code) connectToHousehold(code.trim());
+
+/* =========================================================
+   SHEET — REJOINDRE / PARTAGER UN FOYER
+========================================================= */
+function openJoinSheet(){
+  var hasCode = !!(state.settings.householdCode && state.fbDb);
+  var shareSection = document.getElementById('joinShareSection');
+  shareSection.style.display = hasCode ? '' : 'none';
+  if(hasCode){
+    document.getElementById('joinDisplayCode').textContent = state.settings.householdCode;
+  }
+  document.getElementById('joinCodeInput').value = '';
+  document.getElementById('joinCodeHint').textContent = '';
+  document.getElementById('joinSheetBackdrop').classList.add('open');
+  setTimeout(function(){ document.getElementById('joinCodeInput').focus(); }, 250);
+}
+function closeJoinSheet(){
+  document.getElementById('joinSheetBackdrop').classList.remove('open');
+}
+document.getElementById('joinCancelBtn').addEventListener('click', closeJoinSheet);
+document.getElementById('joinSheetBackdrop').addEventListener('click', function(e){
+  if(e.target === this) closeJoinSheet();
 });
+
+// Auto-format du code (majuscules, 6 chars max)
+document.getElementById('joinCodeInput').addEventListener('input', function(e){
+  var v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+  e.target.value = v;
+  var hint = document.getElementById('joinCodeHint');
+  hint.textContent = v.length === 6 ? '✓ Code prêt — appuyez sur Rejoindre' : (v.length > 0 ? (6 - v.length) + ' caractère(s) manquant(s)' : '');
+  hint.style.color = v.length === 6 ? '#2e6b34' : 'var(--text-muted)';
+  document.getElementById('joinConfirmBtn').disabled = v.length !== 6;
+});
+
+// Copier le code
+document.getElementById('joinCopyBtn').addEventListener('click', function(){
+  var code = state.settings.householdCode;
+  var msg = 'Rejoins mon garde-manger ! Code du foyer : ' + code + '\n\nTélécharge l\'app : ' + window.location.href.split('?')[0];
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(function(){ showToast('Code copié dans le presse-papiers'); });
+  } else {
+    showToast('Code : ' + code);
+  }
+});
+
+// Partage natif (SMS, WhatsApp…)
+document.getElementById('joinShareBtn').addEventListener('click', function(){
+  var code = state.settings.householdCode;
+  var msg = 'Rejoins mon garde-manger partagé ! 🥦\n\nCode du foyer : ' + code + '\n\nOuvre l\'app et va dans la bannière en haut → Rejoindre un foyer → entre le code.';
+  if(navigator.share){
+    navigator.share({ title:'Code foyer Garde-Manger', text: msg })
+      .catch(function(){});
+  } else {
+    var waUrl = 'https://wa.me/?text=' + encodeURIComponent(msg);
+    window.open(waUrl, '_blank');
+  }
+});
+
+// Confirmer la jointure
+document.getElementById('joinConfirmBtn').disabled = true;
+document.getElementById('joinConfirmBtn').addEventListener('click', function(){
+  var code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if(code.length !== 6){ return; }
+  var cfgStr = document.getElementById('fbConfigInput').value.trim() || state.settings.firebaseConfig;
+  if(!cfgStr){
+    closeJoinSheet();
+    showToast('Configurez d\'abord Firebase dans Réglages');
+    switchScreen('settings');
+    return;
+  }
+  closeJoinSheet();
+  connectToHousehold(code);
+});
+
+// Mise à jour de la bannière
+function updateFbBanner(connected, code){
+  var dot  = document.getElementById('fbBannerDot');
+  var text = document.getElementById('fbBannerText');
+  var badge = document.getElementById('fbBannerCode');
+  if(connected && code){
+    dot.className = 'fb-dot';
+    text.textContent = 'Foyer synchronisé';
+    badge.textContent = code;
+    badge.style.display = '';
+  } else {
+    dot.className = 'fb-dot off';
+    text.textContent = 'Aucun foyer connecté — touchez pour rejoindre';
+    badge.style.display = 'none';
+  }
+}
 
 /* =========================================================
    EXPORT / IMPORT JSON LOCAL
