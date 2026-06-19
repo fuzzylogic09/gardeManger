@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E3A2B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Garde-Manger — Recettes depuis vos placards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#efe9d8;
+  --surface:#FFFFFF;
+  --primary:#1E3A2B;
+  --primary-light:#2F5141;
+  --accent:#E8A33D;
+  --accent-soft:#FBE6C4;
+  --danger:#C5533C;
+  --danger-soft:#F6DCD4;
+  --text:#2A2620;
+  --text-muted:#8A8270;
+  --border:#E7E1D2;
+  --radius-s:10px;
+  --radius-m:16px;
+  --radius-l:26px;
+  --shadow-card:0 1px 2px rgba(42,38,32,.06), 0 6px 16px rgba(42,38,32,.08);
+  --font-display:'Fraunces', serif;
+  --font-body:'Work Sans', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  color:var(--text);
+  background:#cfc6a8;
+  background-image:radial-gradient(circle at 20% -10%, #3a5847 0%, #cfc6a8 55%);
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;}
+input,select,textarea{font-family:inherit; color:var(--text);}
+
+#app{
+  position:relative;
+  background:var(--bg);
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+@media (min-width:481px){
+  body{display:flex; justify-content:center; padding:28px 0; overflow:auto;}
+  #app{
+    max-width:420px;
+    min-height:860px;
+    max-height:860px;
+    border-radius:40px;
+    box-shadow:0 30px 60px rgba(0,0,0,.35);
+    border:8px solid #14150f;
+  }
+}
+
+/* ---------- Header ---------- */
+.appbar{
+  padding:calc(18px + var(--safe-top)) 20px 14px;
+  background:var(--primary);
+  color:#fff;
+  flex-shrink:0;
+}
+.appbar .eyebrow{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+  opacity:.9;
+}
+.appbar h1{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:26px;
+  margin:2px 0 0;
+}
+.appbar .sub{font-size:13px; color:#cfd8cf; margin-top:2px;}
+.appbar-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.back-btn{
+  background:rgba(255,255,255,.12); border:none; color:#fff;
+  width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.back-btn svg{width:18px;height:18px;}
+
+/* ---------- Screens ---------- */
+.screens{flex:1; min-height:0; display:flex; flex-direction:column; position:relative;}
+.screen{
+  display:none;
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  padding:16px 16px calc(20px + var(--safe-bottom));
+  -webkit-overflow-scrolling:touch;
+}
+.screen.active{display:flex; flex-direction:column;}
+
+/* ---------- Bottom nav ---------- */
+.bottomnav{
+  display:flex;
+  border-top:1px solid var(--border);
+  background:var(--surface);
+  padding-bottom:var(--safe-bottom);
+  flex-shrink:0;
+}
+.bottomnav.hidden{display:none;}
+.navbtn{
+  flex:1; border:none; background:none; padding:9px 2px 7px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  color:var(--text-muted); font-size:10.5px; font-weight:600;
+}
+.navbtn svg{width:20px; height:20px;}
+.navbtn.active{color:var(--primary);}
+
+/* ---------- Buttons ---------- */
+.btn{
+  border:none; border-radius:14px; padding:13px 18px; font-weight:600; font-size:15px;
+  cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .05s ease;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--primary); color:#fff;}
+.btn-accent{background:var(--accent); color:#3a2705;}
+.btn-secondary{background:var(--surface); color:var(--primary); border:1.5px solid var(--border);}
+.btn-danger{background:var(--danger-soft); color:var(--danger);}
+.btn-block{width:100%;}
+.btn-sm{padding:8px 12px; font-size:13px; border-radius:10px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.icon-btn{
+  border:none; background:var(--bg); width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted);
+  flex-shrink:0;
+}
+.icon-btn svg{width:16px;height:16px;}
+.icon-btn.danger{color:var(--danger);}
+.star-btn{border:none; background:none; padding:4px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.star-btn svg{width:21px; height:21px; fill:none;}
+.star-btn.active{color:var(--accent);}
+.star-btn.active svg{fill:currentColor;}
+.servings-adjust{display:flex; align-items:center; justify-content:space-between; margin:12px 0 2px; font-size:13.5px; font-weight:600; color:var(--text-muted);}
+
+/* ---------- Section titles ---------- */
+.section-title{
+  font-family:var(--font-display); font-weight:600; font-size:18px; margin:4px 0 10px;
+}
+.helper{color:var(--text-muted); font-size:13px; line-height:1.5;}
+
+/* ---------- Search ---------- */
+.search-row{display:flex; gap:8px; margin-bottom:10px;}
+.search-input{
+  flex:1; border:1.5px solid var(--border); border-radius:12px; padding:10px 12px;
+  font-size:14px; background:var(--surface);
+}
+.search-input:focus{outline:2px solid var(--accent); border-color:transparent;}
+
+/* ---------- Category filter chips ---------- */
+.chip-row{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:14px; -webkit-overflow-scrolling:touch;}
+.chip-row::-webkit-scrollbar{display:none;}
+.chip{
+  flex-shrink:0; border:1.5px solid var(--border); background:var(--surface); color:var(--text-muted);
+  font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:999px; cursor:pointer; white-space:nowrap;
+}
+.chip.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+.chip .chip-dot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle;}
+
+/* ---------- Pantry list ---------- */
+.cat-group{margin-bottom:18px;}
+.cat-label{
+  display:flex; align-items:center; gap:7px; font-size:12px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin-bottom:8px;
+}
+.cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.item-card{
+  background:var(--surface); border-radius:var(--radius-m); box-shadow:var(--shadow-card);
+  padding:12px 12px; display:flex; align-items:center; gap:10px; margin-bottom:8px;
+}
+.item-card .name{font-weight:600; font-size:15px;}
+.item-card .meta{font-size:12px; color:var(--text-muted);}
+.qty-pill{
+  font-family:var(--font-mono); font-weight:600; font-size:12.5px; background:var(--accent-soft);
+  color:#7a4f0c; padding:5px 10px; border-radius:999px; white-space:nowrap; flex-shrink:0;
+}
+.item-actions{display:flex; gap:6px; flex-shrink:0;}
+.lib-card{cursor:pointer; border:1.5px solid transparent;}
+.lib-card:active{border-color:var(--accent);}
+.lib-card .qty-pill{background:var(--bg); color:var(--text-muted);}
+.empty-state{
+  text-align:center; padding:40px 20px; color:var(--text-muted); flex:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+}
+.empty-state svg{width:54px; height:54px; opacity:.5;}
+.empty-state p{margin:0; font-size:14px; line-height:1.5; max-width:260px;}
+
+/* ---------- Fab ---------- */
+.fab-row{position:sticky; bottom:0; padding-top:10px; background:linear-gradient(to top, var(--bg) 60%, transparent);}
+
+/* ---------- Recipes ---------- */
+.recipe-cta{
+  background:var(--primary); border-radius:var(--radius-l); padding:20px; color:#fff; margin-bottom:18px;
+  background-image:radial-gradient(circle at 100% 0%, rgba(232,163,61,.25), transparent 60%);
+}
+.recipe-cta h2{font-family:var(--font-display); font-size:19px; margin:0 0 4px; font-weight:600;}
+.recipe-cta p{font-size:13px; color:#d7ddd3; margin:0 0 14px; line-height:1.5;}
+.recipe-card{
+  background:var(--surface); border-radius:var(--radius-m); box-shadow:var(--shadow-card);
+  padding:14px; margin-bottom:10px; cursor:pointer; border:1.5px solid transparent;
+}
+.recipe-card:active{border-color:var(--accent);}
+.recipe-card .title{font-family:var(--font-display); font-weight:600; font-size:16.5px; margin:0 0 4px;}
+.recipe-card .desc{font-size:13px; color:var(--text-muted); margin:0 0 10px; line-height:1.45;}
+.recipe-tags{display:flex; gap:6px; flex-wrap:wrap;}
+.tag{
+  font-size:11px; font-weight:700; padding:4px 9px; border-radius:999px; background:var(--bg); color:var(--text-muted);
+}
+.tag.diff-facile{background:#e3f0e2; color:#2e6b34;}
+.tag.diff-moyen{background:var(--accent-soft); color:#7a4f0c;}
+.tag.diff-difficile{background:var(--danger-soft); color:var(--danger);}
+
+.loading-box{display:flex; flex-direction:column; align-items:center; gap:14px; padding:50px 20px; color:var(--text-muted); flex:1; justify-content:center;}
+.spinner{width:34px; height:34px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--primary); animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ---------- Recipe detail ---------- */
+.detail-hero{margin-bottom:14px;}
+.detail-hero h2{font-family:var(--font-display); font-size:22px; font-weight:700; margin:0 0 6px;}
+.detail-hero p{font-size:13.5px; color:var(--text-muted); margin:0 0 10px; line-height:1.5;}
+.ing-row{
+  background:var(--surface); border-radius:var(--radius-m); box-shadow:var(--shadow-card);
+  padding:10px 10px 10px 14px; display:flex; align-items:center; gap:10px; margin-bottom:8px;
+}
+.ing-row .name{flex:1; font-size:14px; font-weight:600;}
+.ing-row .warn{font-size:11px; color:var(--danger); font-weight:600; display:block; margin-top:2px;}
+.stepper{display:flex; align-items:center; gap:6px; background:var(--bg); border-radius:10px; padding:3px;}
+.stepper button{
+  width:24px; height:24px; border:none; background:var(--surface); border-radius:7px; font-size:15px;
+  font-weight:700; cursor:pointer; color:var(--primary); display:flex; align-items:center; justify-content:center;
+}
+.stepper .val{font-family:var(--font-mono); font-size:12.5px; font-weight:600; min-width:54px; text-align:center;}
+.steps-list{list-style:none; margin:0; padding:0; counter-reset:step;}
+.steps-list li{
+  counter-increment:step; display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;
+}
+.steps-list li::before{
+  content:counter(step); font-family:var(--font-mono); font-weight:700; font-size:13px;
+  background:var(--primary); color:#fff; width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.steps-list li span{font-size:14.5px; line-height:1.55; padding-top:3px;}
+.detail-actions{position:sticky; bottom:0; background:linear-gradient(to top, var(--bg) 65%, transparent); padding-top:16px;}
+
+/* ---------- Settings ---------- */
+.settings-block{
+  background:var(--surface); border-radius:var(--radius-m); box-shadow:var(--shadow-card);
+  padding:16px; margin-bottom:14px;
+}
+.settings-block h3{font-family:var(--font-display); font-size:15.5px; margin:0 0 4px; font-weight:600;}
+.settings-block .desc{font-size:12.5px; color:var(--text-muted); margin:0 0 12px; line-height:1.5;}
+.field{margin-bottom:10px;}
+.field label{display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.04em;}
+.field input,.field select{
+  width:100%; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; background:var(--bg);
+}
+.field input:focus,.field select:focus{outline:2px solid var(--accent); border-color:transparent;}
+.pwd-row{display:flex; gap:8px;}
+.pwd-row input{flex:1;}
+.status-pill{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; padding:6px 11px; border-radius:999px;}
+.status-ok{background:#e3f0e2; color:#2e6b34;}
+.status-off{background:var(--bg); color:var(--text-muted);}
+.btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+details.help{margin-top:6px;}
+details.help summary{font-size:12.5px; font-weight:700; color:var(--primary); cursor:pointer;}
+details.help ol{font-size:12.5px; color:var(--text-muted); line-height:1.6; padding-left:18px; margin:8px 0 0;}
+details.help a{color:var(--primary); font-weight:600;}
+
+/* ---------- Bottom sheet (modal) ---------- */
+.sheet-backdrop{
+  position:fixed; inset:0; background:rgba(20,18,14,.45); z-index:40; display:none;
+}
+.sheet-backdrop.open{display:block;}
+.sheet{
+  position:absolute; left:0; right:0; bottom:0; background:var(--surface);
+  border-radius:24px 24px 0 0; padding:18px 20px calc(22px + var(--safe-bottom));
+  max-height:82%; overflow-y:auto; transform:translateY(100%); transition:transform .25s ease;
+}
+.sheet-backdrop.open .sheet{transform:translateY(0);}
+.sheet-handle{width:38px; height:4px; background:var(--border); border-radius:99px; margin:0 auto 14px;}
+.sheet h3{font-family:var(--font-display); font-size:18px; margin:0 0 14px; font-weight:600;}
+.sheet .btn-row{margin-top:16px;}
+.qty-row{display:flex; gap:8px;}
+.qty-row .field{flex:1;}
+
+/* confirm dialog reuses sheet style but centered */
+.confirm-sheet{max-width:340px; left:50%; right:auto; transform:translate(-50%,40px); bottom:auto; top:50%; border-radius:22px;}
+.sheet-backdrop.open .confirm-sheet{transform:translate(-50%,-50%);}
+.confirm-sheet p{font-size:13.5px; color:var(--text-muted); line-height:1.5; margin:0 0 18px;}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:absolute; left:16px; right:16px; bottom:90px; z-index:60;
+  background:#1c1a14; color:#fff; padding:12px 16px; border-radius:12px; font-size:13.5px;
+  box-shadow:0 8px 20px rgba(0,0,0,.25); opacity:0; transform:translateY(10px);
+  transition:opacity .25s ease, transform .25s ease; pointer-events:none; text-align:center;
+}
+#toast.show{opacity:1; transform:translateY(0);}
+
+::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== APPBAR ===== -->
+  <div class="appbar" id="appbar">
+    <div class="appbar-row">
+      <button class="back-btn" id="backBtn" style="display:none" aria-label="Retour">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div>
+        <div class="eyebrow" id="appbarEyebrow">Inventaire</div>
+        <h1 id="appbarTitle">Garde-Manger</h1>
+      </div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="sub" id="appbarSub">Ce qu'il y a dans vos placards</div>
+  </div>
+
+  <!-- ===== SCREENS ===== -->
+  <div class="screens">
+
+    <!-- PANTRY -->
+    <div class="screen active" id="screen-pantry">
+      <div class="search-row">
+        <input type="text" class="search-input" id="pantrySearch" placeholder="Rechercher un aliment…">
+      </div>
+      <div class="chip-row" id="pantryCatChips"></div>
+      <div id="pantryList"></div>
+      <div class="fab-row">
+        <button class="btn btn-primary btn-block" id="openAddIngredient">+ Ajouter un aliment</button>
+      </div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="screen" id="screen-library">
+      <div class="search-row">
+        <input type="text" class="search-input" id="librarySearch" placeholder="Rechercher dans la bibliothèque…">
+      </div>
+      <div class="chip-row" id="libraryCatChips"></div>
+      <p class="helper" style="margin:-4px 0 12px;">Touchez un aliment pour l'ajouter à votre garde-manger.</p>
+      <div id="libraryList"></div>
+    </div>
+
+    <!-- RECIPES -->
+    <div class="screen" id="screen-recipes">
+      <div class="recipe-cta">
+        <h2>Que puis-je cuisiner&nbsp;?</h2>
+        <p>L'IA propose des recettes réalisables uniquement avec les aliments de votre garde-manger.</p>
+        <div class="field" style="margin-bottom:14px;">
+          <label for="recipeCategorySelect" style="color:#cfd8cf;">Catégorie de recette</label>
+          <select id="recipeCategorySelect"></select>
+        </div>
+        <button class="btn btn-accent btn-block" id="findRecipesBtn">Trouver des recettes</button>
+      </div>
+      <div class="chip-row" id="recipesTabRow">
+        <button type="button" class="chip active" data-tab="suggestions">Suggestions</button>
+        <button type="button" class="chip" data-tab="favorites">Favoris<span id="favCountBadge"></span></button>
+      </div>
+      <div id="recipesContent"></div>
+      <div id="favoritesContent" style="display:none;"></div>
+    </div>
+
+    <!-- ANALYSIS -->
+    <div class="screen" id="screen-analysis">
+      <div class="recipe-cta" style="background-image:radial-gradient(circle at 100% 0%, rgba(59,111,160,.3), transparent 60%);">
+        <h2>Un avis sur mon garde-manger</h2>
+        <p>L'IA passe en revue votre inventaire&nbsp;: points forts, manques, excédents et idées de courses.</p>
+        <button class="btn btn-accent btn-block" id="analyzeBtn">Analyser mon garde-manger</button>
+      </div>
+      <div id="analysisContent"></div>
+    </div>
+
+    <!-- RECIPE DETAIL -->
+    <div class="screen" id="screen-recipe-detail">
+      <div id="recipeDetailContent"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="screen" id="screen-settings">
+
+      <div class="settings-block">
+        <h3>Connexion à l'IA (Gemini)</h3>
+        <p class="desc">Une clé API gratuite est nécessaire pour générer des recettes.</p>
+        <div class="field">
+          <label for="geminiKeyInput">Clé API Gemini</label>
+          <div class="pwd-row">
+            <input type="password" id="geminiKeyInput" placeholder="AIza…">
+            <button class="icon-btn" id="toggleKeyVisibility" aria-label="Afficher la clé">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="geminiModelInput">Modèle</label>
+          <input type="text" id="geminiModelInput" list="modelsList" placeholder="gemini-2.5-flash">
+          <datalist id="modelsList">
+            <option value="gemini-2.5-flash">
+            <option value="gemini-2.5-flash-lite">
+            <option value="gemini-2.5-pro">
+            <option value="gemini-3.5-flash">
+            <option value="gemini-3-pro-preview">
+          </datalist>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="saveGeminiSettings">Enregistrer</button>
+        <details class="help">
+          <summary>Comment obtenir une clé gratuite&nbsp;?</summary>
+          <ol>
+            <li>Ouvrez <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> et connectez-vous.</li>
+            <li>Cliquez sur « Create API key ».</li>
+            <li>Copiez la clé et collez-la ci-dessus.</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="settings-block">
+        <h3>🔥 Foyer partagé (Firebase)</h3>
+        <p class="desc">Partagez votre garde-manger en temps réel avec votre famille. Chaque personne rejoignant le même code verra les mises à jour instantanément.</p>
+        <div id="fbStatusRow" style="margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <span class="status-pill status-off" id="fbStatusPill">Non connecté</span>
+          <span id="fbSyncLabel" style="font-size:12px; color:var(--text-muted);"></span>
+        </div>
+        <div class="field">
+          <label for="fbConfigInput">Configuration Firebase (JSON)</label>
+          <textarea id="fbConfigInput" rows="4" style="width:100%; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12px; background:var(--bg); resize:vertical; font-family:var(--font-mono);" placeholder='{"apiKey":"…","authDomain":"…","projectId":"…","storageBucket":"…","messagingSenderId":"…","appId":"…"}'></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" id="fbConnectBtn">Se connecter à Firebase</button>
+
+        <div id="fbHouseholdSection" style="display:none; margin-top:16px;">
+          <div style="background:var(--bg); border-radius:12px; padding:14px; margin-bottom:12px; text-align:center;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:6px;">Code de votre foyer</div>
+            <div id="fbCodeDisplay" style="font-family:var(--font-mono); font-size:28px; font-weight:700; letter-spacing:.18em; color:var(--primary);"></div>
+            <button class="btn btn-secondary btn-sm" id="fbCopyCodeBtn" style="margin-top:8px;">Copier le code</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-secondary btn-sm" id="fbNewHouseholdBtn">Nouveau foyer</button>
+            <button class="btn btn-accent btn-sm" id="fbJoinBtn">Rejoindre un foyer</button>
+          </div>
+        </div>
+
+        <details class="help" style="margin-top:12px;">
+          <summary>Créer une base Firebase (gratuit, 5 min)</summary>
+          <ol>
+            <li>Allez sur <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> et créez un projet (désactivez Google Analytics si souhaité).</li>
+            <li>Dans le menu gauche → <strong>Firestore Database</strong> → Créer une base de données → Mode <strong>test</strong> (à sécuriser ensuite).</li>
+            <li>Dans <strong>Règles</strong>, collez ces règles puis publiez :<br>
+              <code style="font-size:11px; background:var(--bg); display:block; padding:6px; border-radius:6px; margin:4px 0; white-space:pre-wrap;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    match /households/{code} {
+      allow read, write: if code.size() == 6;
+    }
+  }
+}</code>
+            </li>
+            <li>Retournez dans les <strong>Paramètres du projet</strong> (roue dentée) → <strong>Vos applications</strong> → ajoutez une appli Web (&lt;/&gt;).</li>
+            <li>Copiez l'objet <code>firebaseConfig</code> et collez-le dans le champ ci-dessus.</li>
+            <li>Si vous utilisez GitHub Pages, ajoutez votre domaine dans <strong>Authentication → Domaines autorisés</strong>.</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="settings-block">
+        <h3>Sauvegarde locale</h3>
+        <p class="desc">Exportez ou importez votre garde-manger en fichier JSON, sans réseau.</p>
+        <div class="btn-row">
+          <button class="btn btn-secondary btn-sm" id="exportJsonBtn">Exporter en JSON</button>
+          <button class="btn btn-secondary btn-sm" id="importJsonBtn">Importer un JSON</button>
+          <input type="file" id="importJsonFile" accept="application/json" style="display:none;">
+        </div>
+      </div>
+
+      <p class="helper" style="text-align:center; margin-top:6px;">Garde-Manger · vos données restent dans votre Firebase personnel.</p>
+    </div>
+
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottomnav" id="bottomnav">
+    <button class="navbtn active" data-screen="pantry">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1.5 10.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 9Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>
+      Cuisine
+    </button>
+    <button class="navbtn" data-screen="library">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
+      Biblio
+    </button>
+    <button class="navbtn" data-screen="recipes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v15.5"/><path d="M6 22a2 2 0 0 1 0-4h13"/><path d="M9 7h8M9 10h8"/></svg>
+      Recettes
+    </button>
+    <button class="navbtn" data-screen="analysis">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z"/><path d="M8.5 12.5h7M8.5 16h4.5"/></svg>
+      Analyse
+    </button>
+    <button class="navbtn" data-screen="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+      Réglages
+    </button>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- ===== SHEET: add/edit ingredient ===== -->
+  <div class="sheet-backdrop" id="ingredientSheetBackdrop">
+    <div class="sheet" id="ingredientSheet">
+      <div class="sheet-handle"></div>
+      <h3 id="ingredientSheetTitle">Ajouter un aliment</h3>
+      <div class="field">
+        <label for="ingNameInput">Nom</label>
+        <input type="text" id="ingNameInput" placeholder="Ex : Œufs">
+      </div>
+      <div class="qty-row">
+        <div class="field" id="ingQtyField">
+          <label for="ingQtyInput">Quantité</label>
+          <input type="number" id="ingQtyInput" min="0" step="0.1" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="ingUnitInput">Unité</label>
+          <select id="ingUnitInput"></select>
+        </div>
+      </div>
+      <p class="helper" id="ingUnspecifiedHint" style="display:none; margin:-4px 0 10px;">Pas de quantité suivie : l'aliment sera simplement marqué « disponible ».</p>
+      <div class="field">
+        <label for="ingCategoryInput">Catégorie</label>
+        <select id="ingCategoryInput"></select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="cancelIngredientBtn" style="flex:1">Annuler</button>
+        <button class="btn btn-primary" id="saveIngredientBtn" style="flex:1">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SHEET: generic confirm ===== -->
+  <div class="sheet-backdrop" id="confirmBackdrop">
+    <div class="sheet confirm-sheet" id="confirmSheet">
+      <h3 id="confirmTitle">Confirmer</h3>
+      <p id="confirmMessage"></p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="confirmCancelBtn" style="flex:1">Annuler</button>
+        <button class="btn btn-danger" id="confirmOkBtn" style="flex:1">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* =========================================================
+   CONSTANTES
+========================================================= */
+var CATEGORIES = [
+  {id:'fruits_legumes', label:'Fruits & légumes', color:'#4C7A50'},
+  {id:'feculents',      label:'Féculents & légumineuses', color:'#C98A2B'},
+  {id:'viandes',        label:'Viandes', color:'#B5483A'},
+  {id:'poissons',       label:'Poissons & fruits de mer', color:'#3B7A91'},
+  {id:'laitiers',       label:'Produits laitiers & œufs', color:'#3B6FA0'},
+  {id:'condiments',     label:'Condiments & sauces', color:'#8C5E3C'},
+  {id:'epices',         label:'Épices & herbes', color:'#6B8E4E'},
+  {id:'epicerie',       label:'Épicerie', color:'#A07B3F'},
+  {id:'autres',         label:'Autres', color:'#7A7567'}
+];
+var UNSPECIFIED_UNIT = 'disponible';
+var DEFAULT_UNIT = 'pièce';
+var UNITS = [
+  {value:UNSPECIFIED_UNIT, label:'Disponible (sans quantité précise)'},
+  {value:'pièce', label:'pièce'},
+  {value:'g', label:'g'},
+  {value:'kg', label:'kg'},
+  {value:'ml', label:'ml'},
+  {value:'L', label:'L'},
+  {value:'c. à café', label:'c. à café'},
+  {value:'c. à soupe', label:'c. à soupe'},
+  {value:'pincée', label:'pincée'},
+  {value:'tranche', label:'tranche'},
+  {value:'paquet', label:'paquet'},
+  {value:'botte', label:'botte'},
+  {value:'autre', label:'autre'}
+];
+var FOOD_LIBRARY = [
+  // Fruits & légumes
+  {name:'Pomme', category:'fruits_legumes', unit:'pièce'},
+  {name:'Banane', category:'fruits_legumes', unit:'pièce'},
+  {name:'Orange', category:'fruits_legumes', unit:'pièce'},
+  {name:'Citron', category:'fruits_legumes', unit:'pièce'},
+  {name:'Citron vert', category:'fruits_legumes', unit:'pièce'},
+  {name:'Poire', category:'fruits_legumes', unit:'pièce'},
+  {name:'Fraises', category:'fruits_legumes', unit:'g'},
+  {name:'Tomate', category:'fruits_legumes', unit:'pièce'},
+  {name:'Concombre', category:'fruits_legumes', unit:'pièce'},
+  {name:'Carotte', category:'fruits_legumes', unit:'pièce'},
+  {name:'Pomme de terre', category:'fruits_legumes', unit:'pièce'},
+  {name:'Oignon', category:'fruits_legumes', unit:'pièce'},
+  {name:'Ail', category:'fruits_legumes', unit:'pièce'},
+  {name:'Échalote', category:'fruits_legumes', unit:'pièce'},
+  {name:'Poivron', category:'fruits_legumes', unit:'pièce'},
+  {name:'Courgette', category:'fruits_legumes', unit:'pièce'},
+  {name:'Aubergine', category:'fruits_legumes', unit:'pièce'},
+  {name:'Salade verte', category:'fruits_legumes', unit:'pièce'},
+  {name:'Épinards', category:'fruits_legumes', unit:'g'},
+  {name:'Brocoli', category:'fruits_legumes', unit:'pièce'},
+  {name:'Chou-fleur', category:'fruits_legumes', unit:'pièce'},
+  {name:'Champignons de Paris', category:'fruits_legumes', unit:'g'},
+  {name:'Avocat', category:'fruits_legumes', unit:'pièce'},
+  {name:'Petits pois', category:'fruits_legumes', unit:'g'},
+  {name:'Haricots verts', category:'fruits_legumes', unit:'g'},
+  {name:'Maïs', category:'fruits_legumes', unit:'g'},
+  {name:'Potiron', category:'fruits_legumes', unit:'pièce'},
+  {name:'Poireau', category:'fruits_legumes', unit:'pièce'},
+  {name:'Radis', category:'fruits_legumes', unit:'pièce'},
+  {name:'Betterave', category:'fruits_legumes', unit:'pièce'},
+  {name:'Gingembre frais', category:'fruits_legumes', unit:'g'},
+  {name:'Mandarine', category:'fruits_legumes', unit:'pièce'},
+  {name:'Clémentine', category:'fruits_legumes', unit:'pièce'},
+  {name:'Pamplemousse', category:'fruits_legumes', unit:'pièce'},
+  {name:'Kiwi', category:'fruits_legumes', unit:'pièce'},
+  {name:'Ananas', category:'fruits_legumes', unit:'pièce'},
+  {name:'Mangue', category:'fruits_legumes', unit:'pièce'},
+  {name:'Pêche', category:'fruits_legumes', unit:'pièce'},
+  {name:'Abricot', category:'fruits_legumes', unit:'pièce'},
+  {name:'Prune', category:'fruits_legumes', unit:'pièce'},
+  {name:'Raisin', category:'fruits_legumes', unit:'g'},
+  {name:'Melon', category:'fruits_legumes', unit:'pièce'},
+  {name:'Pastèque', category:'fruits_legumes', unit:'pièce'},
+  {name:'Cerises', category:'fruits_legumes', unit:'g'},
+  {name:'Framboises', category:'fruits_legumes', unit:'g'},
+  {name:'Myrtilles', category:'fruits_legumes', unit:'g'},
+  {name:'Céleri', category:'fruits_legumes', unit:'pièce'},
+  {name:'Fenouil', category:'fruits_legumes', unit:'pièce'},
+  {name:'Endive', category:'fruits_legumes', unit:'pièce'},
+  {name:'Patate douce', category:'fruits_legumes', unit:'pièce'},
+
+  // Féculents & légumineuses
+  {name:'Pâtes', category:'feculents', unit:'g'},
+  {name:'Riz', category:'feculents', unit:'g'},
+  {name:'Pain', category:'feculents', unit:'pièce'},
+  {name:'Pain de mie', category:'feculents', unit:'tranche'},
+  {name:'Farine', category:'feculents', unit:'g'},
+  {name:'Semoule', category:'feculents', unit:'g'},
+  {name:'Quinoa', category:'feculents', unit:'g'},
+  {name:'Boulgour', category:'feculents', unit:'g'},
+  {name:'Lentilles', category:'feculents', unit:'g'},
+  {name:'Pois chiches', category:'feculents', unit:'g'},
+  {name:'Haricots blancs', category:'feculents', unit:'g'},
+  {name:'Haricots rouges', category:'feculents', unit:'g'},
+  {name:'Flocons d\'avoine', category:'feculents', unit:'g'},
+  {name:'Couscous', category:'feculents', unit:'g'},
+  {name:'Polenta', category:'feculents', unit:'g'},
+  {name:'Vermicelles', category:'feculents', unit:'g'},
+  {name:'Tortillas / Wraps', category:'feculents', unit:'pièce'},
+  {name:'Riz complet', category:'feculents', unit:'g'},
+  {name:'Pain complet', category:'feculents', unit:'pièce'},
+  {name:'Biscottes', category:'feculents', unit:'paquet'},
+  {name:'Crackers', category:'feculents', unit:'paquet'},
+  {name:'Galettes de riz', category:'feculents', unit:'paquet'},
+  {name:'Lentilles corail', category:'feculents', unit:'g'},
+  {name:'Fèves', category:'feculents', unit:'g'},
+  {name:'Pâtes complètes', category:'feculents', unit:'g'},
+
+  // Viandes
+  {name:'Filet de poulet', category:'viandes', unit:'g'},
+  {name:'Bœuf haché', category:'viandes', unit:'g'},
+  {name:'Steak de bœuf', category:'viandes', unit:'pièce'},
+  {name:'Filet de porc', category:'viandes', unit:'g'},
+  {name:'Lardons', category:'viandes', unit:'g'},
+  {name:'Jambon', category:'viandes', unit:'tranche'},
+  {name:'Saucisses', category:'viandes', unit:'pièce'},
+  {name:'Escalope de dinde', category:'viandes', unit:'g'},
+  {name:'Agneau', category:'viandes', unit:'g'},
+  {name:'Bacon', category:'viandes', unit:'tranche'},
+  {name:'Chorizo', category:'viandes', unit:'g'},
+  {name:'Veau', category:'viandes', unit:'g'},
+  {name:'Magret de canard', category:'viandes', unit:'pièce'},
+  {name:'Cuisses de poulet', category:'viandes', unit:'pièce'},
+  {name:'Ailes de poulet', category:'viandes', unit:'pièce'},
+  {name:'Poulet entier', category:'viandes', unit:'pièce'},
+  {name:'Merguez', category:'viandes', unit:'pièce'},
+  {name:'Boudin noir', category:'viandes', unit:'g'},
+  {name:'Pâté', category:'viandes', unit:'g'},
+  {name:'Rillettes', category:'viandes', unit:'g'},
+  {name:'Foie de volaille', category:'viandes', unit:'g'},
+  {name:'Côtelettes d\'agneau', category:'viandes', unit:'pièce'},
+  {name:'Viande hachée de porc', category:'viandes', unit:'g'},
+  {name:'Travers de porc', category:'viandes', unit:'pièce'},
+
+  // Poissons & fruits de mer
+  {name:'Saumon', category:'poissons', unit:'g'},
+  {name:'Thon en conserve', category:'poissons', unit:'pièce'},
+  {name:'Cabillaud', category:'poissons', unit:'g'},
+  {name:'Crevettes', category:'poissons', unit:'g'},
+  {name:'Moules', category:'poissons', unit:'g'},
+  {name:'Sardines en conserve', category:'poissons', unit:'pièce'},
+  {name:'Truite', category:'poissons', unit:'pièce'},
+  {name:'Colin', category:'poissons', unit:'g'},
+  {name:'Maquereau', category:'poissons', unit:'pièce'},
+  {name:'Calamars', category:'poissons', unit:'g'},
+  {name:'Dorade', category:'poissons', unit:'pièce'},
+  {name:'Bar (loup de mer)', category:'poissons', unit:'pièce'},
+  {name:'Lieu noir', category:'poissons', unit:'g'},
+  {name:'Merlu', category:'poissons', unit:'g'},
+  {name:'Anchois', category:'poissons', unit:'g'},
+  {name:'Surimi', category:'poissons', unit:'pièce'},
+  {name:'Tarama', category:'poissons', unit:'g'},
+  {name:'Saumon fumé', category:'poissons', unit:'tranche'},
+
+  // Produits laitiers & œufs
+  {name:'Œufs', category:'laitiers', unit:'pièce'},
+  {name:'Lait', category:'laitiers', unit:'L'},
+  {name:'Beurre', category:'laitiers', unit:'g'},
+  {name:'Crème fraîche', category:'laitiers', unit:'g'},
+  {name:'Yaourt nature', category:'laitiers', unit:'pièce'},
+  {name:'Yaourt grec', category:'laitiers', unit:'pièce'},
+  {name:'Fromage râpé', category:'laitiers', unit:'g'},
+  {name:'Mozzarella', category:'laitiers', unit:'pièce'},
+  {name:'Parmesan', category:'laitiers', unit:'g'},
+  {name:'Comté', category:'laitiers', unit:'g'},
+  {name:'Feta', category:'laitiers', unit:'g'},
+  {name:'Fromage blanc', category:'laitiers', unit:'g'},
+  {name:'Crème liquide', category:'laitiers', unit:'ml'},
+  {name:'Lait de coco', category:'laitiers', unit:'ml'},
+  {name:'Mascarpone', category:'laitiers', unit:'g'},
+  {name:'Skyr', category:'laitiers', unit:'pièce'},
+  {name:'Petit-suisse', category:'laitiers', unit:'pièce'},
+  {name:'Babeurre', category:'laitiers', unit:'ml'},
+  {name:'Ricotta', category:'laitiers', unit:'g'},
+  {name:'Emmental', category:'laitiers', unit:'g'},
+  {name:'Fromage de chèvre', category:'laitiers', unit:'g'},
+  {name:'Lait d\'amande', category:'laitiers', unit:'L'},
+
+  // Condiments & sauces
+  {name:'Huile d\'olive', category:'condiments', unit:'ml'},
+  {name:'Huile de tournesol', category:'condiments', unit:'ml'},
+  {name:'Vinaigre balsamique', category:'condiments', unit:'ml'},
+  {name:'Vinaigre blanc', category:'condiments', unit:'ml'},
+  {name:'Moutarde', category:'condiments', unit:'g'},
+  {name:'Mayonnaise', category:'condiments', unit:'g'},
+  {name:'Ketchup', category:'condiments', unit:'g'},
+  {name:'Sauce soja', category:'condiments', unit:'ml'},
+  {name:'Sauce tomate', category:'condiments', unit:'ml'},
+  {name:'Pesto', category:'condiments', unit:'g'},
+  {name:'Miel', category:'condiments', unit:'g'},
+  {name:'Sirop d\'érable', category:'condiments', unit:'ml'},
+  {name:'Vinaigre de cidre', category:'condiments', unit:'ml'},
+  {name:'Sauce worcestershire', category:'condiments', unit:'ml'},
+  {name:'Sauce barbecue', category:'condiments', unit:'ml'},
+  {name:'Sauce nuoc-mâm', category:'condiments', unit:'ml'},
+  {name:'Tahini', category:'condiments', unit:'g'},
+  {name:'Harissa', category:'condiments', unit:'g'},
+  {name:'Câpres', category:'condiments', unit:'g'},
+  {name:'Cornichons', category:'condiments', unit:'g'},
+
+  // Épices & herbes (unité "disponible" par défaut)
+  {name:'Sel', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Poivre noir', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Paprika', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Cumin', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Curry', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Curcuma', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Cannelle', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Noix de muscade', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Origan', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Thym', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Basilic séché', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Persil séché', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Ciboulette séchée', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Laurier', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Piment de Cayenne', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Herbes de Provence', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Ail en poudre', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Gingembre en poudre', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Piment doux', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Coriandre en poudre', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Safran', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Vanille', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Graines de sésame', category:'epices', unit:UNSPECIFIED_UNIT},
+  {name:'Fleur de sel', category:'epices', unit:UNSPECIFIED_UNIT},
+
+  // Épicerie
+  {name:'Sucre', category:'epicerie', unit:'g'},
+  {name:'Sucre vanillé', category:'epicerie', unit:'paquet'},
+  {name:'Levure chimique', category:'epicerie', unit:'paquet'},
+  {name:'Levure de boulanger', category:'epicerie', unit:'paquet'},
+  {name:'Chocolat noir', category:'epicerie', unit:'g'},
+  {name:'Chocolat au lait', category:'epicerie', unit:'g'},
+  {name:'Tomates pelées en conserve', category:'epicerie', unit:'pièce'},
+  {name:'Concentré de tomate', category:'epicerie', unit:'g'},
+  {name:'Bouillon de volaille (cube)', category:'epicerie', unit:'pièce'},
+  {name:'Bouillon de légumes (cube)', category:'epicerie', unit:'pièce'},
+  {name:'Café', category:'epicerie', unit:'g'},
+  {name:'Thé', category:'epicerie', unit:'paquet'},
+  {name:'Noix', category:'epicerie', unit:'g'},
+  {name:'Amandes', category:'epicerie', unit:'g'},
+  {name:'Raisins secs', category:'epicerie', unit:'g'},
+  {name:'Olives', category:'epicerie', unit:'g'},
+  {name:'Maïzena', category:'epicerie', unit:'g'},
+  {name:'Levure de bière', category:'epicerie', unit:'paquet'},
+  {name:'Pâte à tartiner', category:'epicerie', unit:'g'},
+  {name:'Confiture', category:'epicerie', unit:'g'},
+  {name:'Biscuits', category:'epicerie', unit:'paquet'},
+  {name:'Céréales petit-déjeuner', category:'epicerie', unit:'g'}
+];
+var RECIPE_CATEGORIES = [
+  {id:'all', label:'Toutes les recettes'},
+  {id:'petit_dejeuner', label:'Petit déjeuner'},
+  {id:'dejeuner', label:'Déjeuner'},
+  {id:'diner', label:'Dîner'},
+  {id:'gouter', label:'Goûter'},
+  {id:'rapide', label:'Repas rapide'},
+  {id:'healthy', label:'Healthy / léger'},
+  {id:'gourmand', label:'Gourmand / réconfortant'},
+  {id:'economique', label:'Économique'},
+  {id:'vegetarien', label:'Végétarien'},
+  {id:'dessert', label:'Dessert'},
+  {id:'apero', label:'Apéro / entrée'}
+];
+var RECIPE_CATEGORY_HINTS = {
+  petit_dejeuner: 'Les recettes doivent être adaptées à un petit-déjeuner (sucré ou salé), simples et rapides à préparer le matin.',
+  dejeuner: 'Les recettes doivent être adaptées à un repas de déjeuner.',
+  diner: 'Les recettes doivent être adaptées à un repas du soir.',
+  gouter: 'Les recettes doivent être adaptées à un goûter ou une collation, plutôt sucrée, facile à préparer et à emporter.',
+  rapide: 'Les recettes doivent être rapides à préparer, 20 minutes maximum au total, avec un minimum d\'étapes.',
+  healthy: 'Les recettes doivent être healthy et équilibrées : privilégie les cuissons légères, peu de matières grasses ajoutées et des produits frais.',
+  gourmand: 'Les recettes doivent être gourmandes et réconfortantes, sans contrainte de légèreté.',
+  economique: 'Les recettes doivent être économiques : limite le nombre d\'ingrédients différents utilisés par recette et privilégie les produits de base déjà bien présents dans l\'inventaire.',
+  vegetarien: 'Les recettes doivent être strictement végétariennes : n\'utilise aucune viande ni poisson.',
+  dessert: 'Les recettes doivent être des desserts sucrés.',
+  apero: 'Les recettes doivent être des idées d\'apéritif ou d\'entrée, faciles à partager.'
+};
+var STAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3.2l2.7 5.6 6.1.7-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.7Z"/></svg>';
+var DRIVE_FILE_NAME = 'garde-manger-data.json';
+var DEFAULT_SETTINGS = { geminiApiKey:'', geminiModel:'gemini-2.5-flash', firebaseConfig:'', householdCode:'' };
+
+/* =========================================================
+   ÉTAT
+========================================================= */
+var state = {
+  pantry: [],
+  recipes: [],
+  activeRecipeId: null,
+  settings: Object.assign({}, DEFAULT_SETTINGS),
+  screen: 'pantry',
+  searchTerm: '',
+  pantryCategoryFilter: 'all',
+  librarySearch: '',
+  libraryCategoryFilter: 'all',
+  recipeCategoryFilter: 'all',
+  recipesTab: 'suggestions',
+  favorites: [],
+  recentRecipeTitles: [],
+  fbApp: null,
+  fbDb: null,
+  fbUnsubscribe: null,
+  fbSyncPending: false,
+  fbSyncingFromRemote: false
+};
+
+function uid(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+function normalize(s){
+  return (s||'').toString().trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+/* =========================================================
+   PERSISTANCE LOCALE
+========================================================= */
+function migrateLegacyUnit(unit){
+  // Compatibilité avec les données enregistrées avant le renommage en "disponible"
+  return (unit === 'non précisé') ? UNSPECIFIED_UNIT : unit;
+}
+function normalizePantryItem(it){
+  var unit = migrateLegacyUnit(it.unit || DEFAULT_UNIT);
+  return {
+    id: it.id || uid(),
+    name: it.name || 'Sans nom',
+    quantity: (unit === UNSPECIFIED_UNIT) ? null : (Number(it.quantity) || 0),
+    unit: unit,
+    category: it.category || 'autres'
+  };
+}
+function loadFromStorage(){
+  try{
+    var p = localStorage.getItem('gm_pantry');
+    if(p) state.pantry = JSON.parse(p).map(normalizePantryItem);
+  }catch(e){ console.warn('Lecture du garde-manger impossible', e); }
+  try{
+    var s = localStorage.getItem('gm_settings');
+    if(s) state.settings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(s));
+  }catch(e){ console.warn('Lecture des réglages impossible', e); }
+  try{
+    var fav = localStorage.getItem('gm_favorites');
+    if(fav) state.favorites = JSON.parse(fav);
+  }catch(e){ console.warn('Lecture des favoris impossible', e); }
+}
+function persistPantry(){
+  try{ localStorage.setItem('gm_pantry', JSON.stringify(state.pantry)); }
+  catch(e){ console.warn('Sauvegarde locale impossible', e); }
+  scheduleFbSync();
+}
+function persistSettings(){
+  try{ localStorage.setItem('gm_settings', JSON.stringify(state.settings)); }
+  catch(e){}
+}
+function persistFavorites(){
+  try{ localStorage.setItem('gm_favorites', JSON.stringify(state.favorites)); }
+  catch(e){ console.warn('Sauvegarde des favoris impossible', e); }
+  scheduleFbSync();
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+var toastTimer = null;
+function showToast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3200);
+}
+
+/* =========================================================
+   CONFIRM DIALOG GÉNÉRIQUE
+========================================================= */
+var pendingConfirmAction = null;
+function showConfirm(opts, onConfirm){
+  document.getElementById('confirmTitle').textContent = opts.title || 'Confirmer';
+  document.getElementById('confirmMessage').textContent = opts.message || '';
+  var okBtn = document.getElementById('confirmOkBtn');
+  okBtn.textContent = opts.confirmLabel || 'Confirmer';
+  okBtn.className = 'btn ' + (opts.danger === false ? 'btn-primary' : 'btn-danger');
+  okBtn.style.flex = '1';
+  pendingConfirmAction = onConfirm;
+  document.getElementById('confirmBackdrop').classList.add('open');
+}
+function closeConfirm(){
+  document.getElementById('confirmBackdrop').classList.remove('open');
+  pendingConfirmAction = null;
+}
+document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirm);
+document.getElementById('confirmBackdrop').addEventListener('click', function(e){
+  if(e.target === this) closeConfirm();
+});
+document.getElementById('confirmOkBtn').addEventListener('click', function(){
+  var fn = pendingConfirmAction;
+  closeConfirm();
+  if(fn) fn();
+});
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+function switchScreen(name){
+  state.screen = name;
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-' + name).classList.add('active');
+
+  document.querySelectorAll('.navbtn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.screen === name);
+  });
+  document.getElementById('bottomnav').classList.toggle('hidden', name === 'recipe-detail');
+  document.getElementById('backBtn').style.display = (name === 'recipe-detail') ? 'flex' : 'none';
+
+  var eyebrow = document.getElementById('appbarEyebrow');
+  var title = document.getElementById('appbarTitle');
+  var sub = document.getElementById('appbarSub');
+  if(name === 'pantry'){
+    eyebrow.textContent = 'Inventaire'; title.textContent = 'Garde-Manger'; sub.textContent = 'Ce qu\'il y a dans vos placards';
+  } else if(name === 'library'){
+    eyebrow.textContent = 'Catalogue'; title.textContent = 'Bibliothèque'; sub.textContent = 'Ajoutez en un geste les aliments courants';
+  } else if(name === 'recipes'){
+    eyebrow.textContent = 'Idées repas'; title.textContent = 'Recettes'; sub.textContent = 'Générées à partir de votre inventaire';
+  } else if(name === 'analysis'){
+    eyebrow.textContent = 'Bilan'; title.textContent = 'Analyse'; sub.textContent = 'L\'avis de l\'IA sur votre garde-manger';
+  } else if(name === 'recipe-detail'){
+    eyebrow.textContent = 'Recette'; title.textContent = 'Détail'; sub.textContent = '';
+  } else if(name === 'settings'){
+    eyebrow.textContent = 'Configuration'; title.textContent = 'Réglages'; sub.textContent = 'IA, Google Drive, sauvegardes';
+  }
+  document.querySelector('.screens').scrollTop = 0;
+}
+document.querySelectorAll('.navbtn').forEach(function(b){
+  b.addEventListener('click', function(){ switchScreen(b.dataset.screen); });
+});
+document.getElementById('backBtn').addEventListener('click', function(){ switchScreen('recipes'); });
+
+/* =========================================================
+   RENDU : GARDE-MANGER
+========================================================= */
+function categoryInfo(id){
+  return CATEGORIES.find(function(c){ return c.id === id; }) || CATEGORIES[CATEGORIES.length-1];
+}
+function fillSelectOptions(){
+  var unitSel = document.getElementById('ingUnitInput');
+  unitSel.innerHTML = UNITS.map(function(u){ return '<option value="'+u.value+'">'+u.label+'</option>'; }).join('');
+  var catSel = document.getElementById('ingCategoryInput');
+  catSel.innerHTML = CATEGORIES.map(function(c){ return '<option value="'+c.id+'">'+c.label+'</option>'; }).join('');
+  var recipeCatSel = document.getElementById('recipeCategorySelect');
+  recipeCatSel.innerHTML = RECIPE_CATEGORIES.map(function(c){ return '<option value="'+c.id+'">'+c.label+'</option>'; }).join('');
+}
+function updateQtyFieldVisibility(){
+  var unit = document.getElementById('ingUnitInput').value;
+  var hide = (unit === UNSPECIFIED_UNIT);
+  document.getElementById('ingQtyField').style.display = hide ? 'none' : '';
+  document.getElementById('ingUnspecifiedHint').style.display = hide ? 'block' : 'none';
+  if(hide) document.getElementById('ingQtyInput').value = '';
+}
+function pantryPillText(item){
+  if(item.unit === UNSPECIFIED_UNIT){ return 'Disponible'; }
+  return formatQty(item.quantity) + ' ' + escapeHtml(item.unit);
+}
+function chipsHtml(activeValue){
+  var html = '<button type="button" class="chip'+(activeValue==='all'?' active':'')+'" data-cat="all">Tout</button>';
+  CATEGORIES.forEach(function(c){
+    html += '<button type="button" class="chip'+(activeValue===c.id?' active':'')+'" data-cat="'+c.id+'">'
+      + '<span class="chip-dot" style="background:'+c.color+'"></span>'+c.label+'</button>';
+  });
+  return html;
+}
+
+function renderPantry(){
+  document.getElementById('pantryCatChips').innerHTML = chipsHtml(state.pantryCategoryFilter);
+  var list = document.getElementById('pantryList');
+  var term = normalize(state.searchTerm);
+  var items = state.pantry.filter(function(it){
+    var matchesTerm = !term || normalize(it.name).indexOf(term) !== -1;
+    var matchesCat = (state.pantryCategoryFilter === 'all') || (it.category || 'autres') === state.pantryCategoryFilter;
+    return matchesTerm && matchesCat;
+  });
+
+  if(state.pantry.length === 0){
+    list.innerHTML = '';
+    list.appendChild(emptyStateNode(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h16l-1.5 10.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 9Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>',
+      'Votre garde-manger est vide. Ajoutez vos premiers aliments pour commencer, ou piochez dans la Bibliothèque.'
+    ));
+    return;
+  }
+  if(items.length === 0){
+    list.innerHTML = '';
+    list.appendChild(emptyStateNode(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+      'Aucun aliment ne correspond à ces critères.'
+    ));
+    return;
+  }
+
+  var byCat = {};
+  items.forEach(function(it){
+    var c = it.category || 'autres';
+    if(!byCat[c]) byCat[c] = [];
+    byCat[c].push(it);
+  });
+
+  var html = '';
+  CATEGORIES.forEach(function(cat){
+    var arr = byCat[cat.id];
+    if(!arr || arr.length === 0) return;
+    arr.sort(function(a,b){ return a.name.localeCompare(b.name, 'fr', {sensitivity:'base'}); });
+    html += '<div class="cat-group">';
+    html += '<div class="cat-label"><span class="cat-dot" style="background:'+cat.color+'"></span>'+cat.label+' · '+arr.length+'</div>';
+    arr.forEach(function(it){
+      html += '<div class="item-card">'
+        + '<div style="flex:1; min-width:0;">'
+        + '<div class="name">'+escapeHtml(it.name)+'</div>'
+        + '</div>'
+        + '<span class="qty-pill">'+pantryPillText(it)+'</span>'
+        + '<div class="item-actions">'
+        + '<button class="icon-btn" data-action="edit" data-id="'+it.id+'" aria-label="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
+        + '<button class="icon-btn danger" data-action="delete" data-id="'+it.id+'" aria-label="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
+        + '</div></div>';
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function renderLibrary(){
+  document.getElementById('libraryCatChips').innerHTML = chipsHtml(state.libraryCategoryFilter);
+  var list = document.getElementById('libraryList');
+  var term = normalize(state.librarySearch);
+  var items = FOOD_LIBRARY.filter(function(it){
+    var matchesTerm = !term || normalize(it.name).indexOf(term) !== -1;
+    var matchesCat = (state.libraryCategoryFilter === 'all') || it.category === state.libraryCategoryFilter;
+    return matchesTerm && matchesCat;
+  });
+
+  if(items.length === 0){
+    list.innerHTML = '';
+    list.appendChild(emptyStateNode(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+      'Aucun aliment ne correspond à ces critères.'
+    ));
+    return;
+  }
+
+  var byCat = {};
+  items.forEach(function(it){
+    var c = it.category || 'autres';
+    if(!byCat[c]) byCat[c] = [];
+    byCat[c].push(it);
+  });
+
+  var html = '';
+  CATEGORIES.forEach(function(cat){
+    var arr = byCat[cat.id];
+    if(!arr || arr.length === 0) return;
+    arr.sort(function(a,b){ return a.name.localeCompare(b.name, 'fr', {sensitivity:'base'}); });
+    html += '<div class="cat-group">';
+    html += '<div class="cat-label"><span class="cat-dot" style="background:'+cat.color+'"></span>'+cat.label+' · '+arr.length+'</div>';
+    arr.forEach(function(it){
+      html += '<div class="item-card lib-card" data-name="'+escapeHtml(it.name)+'">'
+        + '<div style="flex:1; min-width:0;">'
+        + '<div class="name">'+escapeHtml(it.name)+'</div>'
+        + '</div>'
+        + '<span class="qty-pill">'+(it.unit === UNSPECIFIED_UNIT ? 'Disponible' : it.unit)+'</span>'
+        + '<button class="icon-btn" aria-label="Ajouter" style="pointer-events:none; color:var(--primary);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+function emptyStateNode(svg, text){
+  var d = document.createElement('div');
+  d.className = 'empty-state';
+  d.innerHTML = svg + '<p>' + text + '</p>';
+  return d;
+}
+function escapeHtml(s){
+  return (s||'').toString().replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function formatQty(q){
+  var n = Number(q);
+  if(isNaN(n)) return q;
+  return (Math.round(n*100)/100).toString().replace('.', ',');
+}
+
+document.getElementById('pantrySearch').addEventListener('input', function(e){
+  state.searchTerm = e.target.value;
+  renderPantry();
+});
+document.getElementById('pantryCatChips').addEventListener('click', function(e){
+  var chip = e.target.closest('.chip');
+  if(!chip) return;
+  state.pantryCategoryFilter = chip.dataset.cat;
+  renderPantry();
+});
+
+document.getElementById('pantryList').addEventListener('click', function(e){
+  var btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  var id = btn.dataset.id;
+  var item = state.pantry.find(function(i){ return i.id === id; });
+  if(!item) return;
+  if(btn.dataset.action === 'edit'){
+    openIngredientModal(item);
+  } else if(btn.dataset.action === 'delete'){
+    showConfirm({
+      title:'Supprimer cet aliment ?',
+      message:'« '+item.name+' » sera retiré de votre garde-manger.',
+      confirmLabel:'Supprimer'
+    }, function(){
+      state.pantry = state.pantry.filter(function(i){ return i.id !== id; });
+      persistPantry();
+      renderPantry();
+      showToast('Aliment supprimé');
+    });
+  }
+});
+
+/* ---------- Bibliothèque ---------- */
+document.getElementById('librarySearch').addEventListener('input', function(e){
+  state.librarySearch = e.target.value;
+  renderLibrary();
+});
+document.getElementById('libraryCatChips').addEventListener('click', function(e){
+  var chip = e.target.closest('.chip');
+  if(!chip) return;
+  state.libraryCategoryFilter = chip.dataset.cat;
+  renderLibrary();
+});
+document.getElementById('libraryList').addEventListener('click', function(e){
+  var card = e.target.closest('.lib-card');
+  if(!card) return;
+  var entry = FOOD_LIBRARY.find(function(f){ return f.name === card.dataset.name; });
+  if(entry) openIngredientModal(null, entry);
+});
+
+/* ---------- Sheet ajout/édition ---------- */
+var editingIngredientId = null;
+function openIngredientModal(item, prefill){
+  editingIngredientId = item ? item.id : null;
+  document.getElementById('ingredientSheetTitle').textContent = item ? 'Modifier l\'aliment' : 'Ajouter un aliment';
+  var name = item ? item.name : (prefill ? prefill.name : '');
+  var unit = item ? item.unit : UNSPECIFIED_UNIT;
+  var category = item ? (item.category || 'autres') : (prefill ? (prefill.category || 'autres') : 'autres');
+  document.getElementById('ingNameInput').value = name;
+  document.getElementById('ingQtyInput').value = (item && item.quantity !== null && item.quantity !== undefined) ? item.quantity : '';
+  document.getElementById('ingUnitInput').value = unit;
+  document.getElementById('ingCategoryInput').value = category;
+  updateQtyFieldVisibility();
+  document.getElementById('ingredientSheetBackdrop').classList.add('open');
+  setTimeout(function(){
+    if(!prefill){ document.getElementById('ingNameInput').focus(); }
+  }, 200);
+}
+function closeIngredientModal(){
+  document.getElementById('ingredientSheetBackdrop').classList.remove('open');
+  editingIngredientId = null;
+}
+document.getElementById('openAddIngredient').addEventListener('click', function(){ openIngredientModal(null); });
+document.getElementById('cancelIngredientBtn').addEventListener('click', closeIngredientModal);
+document.getElementById('ingUnitInput').addEventListener('change', updateQtyFieldVisibility);
+document.getElementById('ingredientSheetBackdrop').addEventListener('click', function(e){
+  if(e.target === this) closeIngredientModal();
+});
+document.getElementById('saveIngredientBtn').addEventListener('click', function(){
+  var name = document.getElementById('ingNameInput').value.trim();
+  var unit = document.getElementById('ingUnitInput').value;
+  var category = document.getElementById('ingCategoryInput').value;
+  var isUnspecified = (unit === UNSPECIFIED_UNIT);
+  var qty = null;
+  if(!name){ showToast('Indiquez un nom d\'aliment'); return; }
+  if(!isUnspecified){
+    qty = parseFloat(document.getElementById('ingQtyInput').value);
+    if(isNaN(qty) || qty < 0){ showToast('Indiquez une quantité valide'); return; }
+  }
+
+  var dup = state.pantry.find(function(i){
+    return i.id !== editingIngredientId && normalize(i.name) === normalize(name);
+  });
+  if(dup){
+    closeIngredientModal();
+    showConfirm({
+      title:'Aliment déjà présent',
+      message:'« '+dup.name+' » est déjà dans votre garde-manger ('+pantryPillText(dup)+'). Mettre à jour sa quantité avec cette nouvelle valeur au lieu de créer un doublon ?',
+      confirmLabel:'Mettre à jour',
+      danger:false
+    }, function(){
+      dup.name = name; dup.quantity = qty; dup.unit = unit; dup.category = category;
+      if(editingIngredientId){
+        state.pantry = state.pantry.filter(function(i){ return i.id !== editingIngredientId; });
+      }
+      persistPantry();
+      renderPantry();
+      showToast('Quantité mise à jour');
+    });
+    return;
+  }
+
+  if(editingIngredientId){
+    var item = state.pantry.find(function(i){ return i.id === editingIngredientId; });
+    if(item){ item.name=name; item.quantity=qty; item.unit=unit; item.category=category; }
+  } else {
+    state.pantry.push({ id:uid(), name:name, quantity:qty, unit:unit, category:category });
+  }
+  persistPantry();
+  renderPantry();
+  closeIngredientModal();
+  showToast('Garde-manger mis à jour');
+});
+
+/* =========================================================
+   GEMINI — RECETTES
+========================================================= */
+function buildPrompt(pantry, excludeTitles, recipeCategory){
+  var compact = pantry.map(function(i){
+    if(i.unit === UNSPECIFIED_UNIT){
+      return {name:i.name, quantity:'disponible', unit:'disponible en quantité suffisante'};
+    }
+    return {name:i.name, quantity:i.quantity, unit:i.unit};
+  });
+  var exclu = (excludeTitles && excludeTitles.length)
+    ? '\nTu as déjà proposé récemment ces titres, ne les reproduis pas et évite aussi les recettes trop similaires à celles-ci : ' + excludeTitles.join(', ') + '.'
+    : '';
+  var categoryHint = (recipeCategory && RECIPE_CATEGORY_HINTS[recipeCategory])
+    ? '\n' + RECIPE_CATEGORY_HINTS[recipeCategory]
+    : '';
+  return 'Tu es un assistant culinaire francophone. Voici l\'inventaire actuel de mon garde-manger, au format JSON :\n'
+    + JSON.stringify(compact)
+    + '\n\nPropose entre 4 et 8 idées de recettes réalisables EXCLUSIVEMENT avec ces aliments. '
+    + 'Règles strictes : chaque ingrédient utilisé dans une recette doit correspondre exactement (même nom) à un aliment présent dans la liste fournie, '
+    + 'et la quantité utilisée ne doit jamais dépasser la quantité disponible indiquée. '
+    + 'Indique pour chaque recette un nombre de portions ("servings") réaliste, 2 par défaut si rien ne le justifie autrement. '
+    + 'Pour les aliments dont la quantité est marquée "disponible" (ex : sel, épices), considère qu\'ils sont disponibles en quantité suffisante : indique tout de même dans la recette une quantité et une unité usuelles de cuisine (ex : "1 pincée", "5 g"), sans contrainte de stock pour ceux-là. '
+    + 'Tu n\'es pas obligé d\'utiliser tous les aliments de la liste. Sois créatif et varie au maximum tes propositions à chaque fois : explore différentes familles de cuisine, différents modes de cuisson et différents types de plats, et évite de toujours proposer les mêmes classiques évidents.' + categoryHint + exclu
+    + '\n\nRéponds UNIQUEMENT avec un JSON valide respectant exactement ce schéma, sans aucun texte avant ou après :\n'
+    + '{"recipes":[{"title":string,"description":string,"servings":number,"time_minutes":number,"difficulty":"facile"|"moyen"|"difficile","ingredients":[{"name":string,"quantity":number,"unit":string}],"steps":[string]}]}';
+}
+
+function setRecipesLoading(isLoading){
+  var content = document.getElementById('recipesContent');
+  var btn = document.getElementById('findRecipesBtn');
+  btn.disabled = isLoading;
+  if(isLoading){
+    content.innerHTML = '';
+    var box = document.createElement('div');
+    box.className = 'loading-box';
+    box.innerHTML = '<div class="spinner"></div><p>L\'IA réfléchit à des idées de recettes…</p>';
+    content.appendChild(box);
+  }
+}
+
+function fetchRecipesFromGemini(){
+  if(!state.settings.geminiApiKey){
+    showToast('Ajoutez votre clé API Gemini dans Réglages');
+    switchScreen('settings');
+    return;
+  }
+  if(state.pantry.length === 0){
+    showToast('Ajoutez d\'abord des aliments à votre garde-manger');
+    return;
+  }
+  setRecipesLoading(true);
+  var model = state.settings.geminiModel || 'gemini-2.5-flash';
+  var prompt = buildPrompt(state.pantry, state.recentRecipeTitles.slice(-30), state.recipeCategoryFilter);
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
+
+  fetch(url, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-goog-api-key': state.settings.geminiApiKey },
+    body: JSON.stringify({
+      contents:[{ role:'user', parts:[{text:prompt}] }],
+      generationConfig:{ responseMimeType:'application/json', temperature:1.0 }
+    })
+  })
+  .then(function(res){
+    if(!res.ok){
+      return res.text().then(function(t){
+        throw new Error('Erreur API Gemini (' + res.status + ')');
+      });
+    }
+    return res.json();
+  })
+  .then(function(data){
+    if(data.promptFeedback && data.promptFeedback.blockReason){
+      throw new Error('Requête bloquée : ' + data.promptFeedback.blockReason);
+    }
+    var candidate = data.candidates && data.candidates[0];
+    if(!candidate){ throw new Error('Aucune réponse reçue du modèle'); }
+    var text = (candidate.content && candidate.content.parts || []).map(function(p){ return p.text || ''; }).join('');
+    var cleaned = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    var parsed = JSON.parse(cleaned);
+    var newRecipes = (parsed.recipes || []).map(function(r){
+      var recipe = Object.assign({}, r, { id: uid() });
+      recipe.baseServings = recipe.servings || 2;
+      if(!recipe.servings) recipe.servings = recipe.baseServings;
+      recipe.ingredients = (recipe.ingredients || []).map(function(ing){
+        return Object.assign({}, ing, { baseQuantity: ing.quantity, _removed: false });
+      });
+      return recipe;
+    });
+    state.recipes = newRecipes;
+    state.recentRecipeTitles = state.recentRecipeTitles
+      .concat(newRecipes.map(function(r){ return r.title; }))
+      .filter(function(t, idx, arr){ return arr.indexOf(t) === idx; })
+      .slice(-40);
+    renderRecipes();
+  })
+  .catch(function(err){
+    console.error(err);
+    var content = document.getElementById('recipesContent');
+    content.innerHTML = '<div class="empty-state"><p>'+escapeHtml(err.message || 'Une erreur est survenue.')+'</p></div>';
+    showToast('Erreur lors de la génération des recettes');
+  })
+  .finally(function(){
+    document.getElementById('findRecipesBtn').disabled = false;
+  });
+}
+
+function isFavorited(id){
+  return state.favorites.some(function(f){ return f.id === id; });
+}
+function cloneRecipe(r){
+  return JSON.parse(JSON.stringify(r));
+}
+function findRecipeById(id){
+  return state.recipes.find(function(r){ return r.id === id; })
+    || state.favorites.find(function(r){ return r.id === id; })
+    || null;
+}
+function toggleFavorite(id){
+  var favIndex = state.favorites.findIndex(function(f){ return f.id === id; });
+  if(favIndex !== -1){
+    state.favorites.splice(favIndex, 1);
+    showToast('Retiré des favoris');
+  } else {
+    var recipe = findRecipeById(id);
+    if(!recipe) return;
+    state.favorites.push(cloneRecipe(recipe));
+    showToast('Ajouté aux favoris');
+  }
+  persistFavorites();
+  renderRecipes();
+  if(state.recipesTab === 'favorites') renderFavorites();
+  else { var badge = document.getElementById('favCountBadge'); if(badge) badge.textContent = state.favorites.length ? ' (' + state.favorites.length + ')' : ''; }
+  if(state.screen === 'recipe-detail' && state.activeRecipeId === id){
+    var current = findRecipeById(id);
+    if(current){ renderRecipeDetail(current); }
+    else { switchScreen('recipes'); switchRecipesTab('favorites'); }
+  }
+}
+function recipeCardHtml(r){
+  var fav = isFavorited(r.id);
+  return '<div class="recipe-card" data-id="'+r.id+'">'
+    + '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">'
+    + '<div class="title" style="flex:1;">'+escapeHtml(r.title)+'</div>'
+    + '<button type="button" class="star-btn'+(fav?' active':'')+'" data-action="favorite" data-id="'+r.id+'" aria-label="Favori">'+STAR_ICON+'</button>'
+    + '</div>'
+    + '<div class="desc">'+escapeHtml(r.description||'')+'</div>'
+    + '<div class="recipe-tags">'
+    + (r.time_minutes ? '<span class="tag">'+r.time_minutes+' min</span>' : '')
+    + (r.servings ? '<span class="tag">'+r.servings+' pers.</span>' : '')
+    + (r.difficulty ? '<span class="tag diff-'+escapeHtml(r.difficulty)+'">'+escapeHtml(r.difficulty)+'</span>' : '')
+    + '</div></div>';
+}
+function renderRecipes(){
+  var content = document.getElementById('recipesContent');
+  var btn = document.getElementById('findRecipesBtn');
+  btn.disabled = false;
+  if(!state.recipes || state.recipes.length === 0){
+    content.innerHTML = '';
+    content.appendChild(emptyStateNode(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v15.5"/><path d="M6 22a2 2 0 0 1 0-4h13"/></svg>',
+      'Aucune recette pour le moment. Appuyez sur « Trouver des recettes » pour obtenir des idées à partir de votre garde-manger.'
+    ));
+    return;
+  }
+  var html = '';
+  state.recipes.forEach(function(r){ html += recipeCardHtml(r); });
+  html += '<button class="btn btn-secondary btn-block" id="regenBtn" style="margin-top:8px;">Voir d\'autres idées</button>';
+  content.innerHTML = html;
+  var regen = document.getElementById('regenBtn');
+  if(regen) regen.addEventListener('click', function(){ fetchRecipesFromGemini(); });
+}
+function renderFavorites(){
+  var content = document.getElementById('favoritesContent');
+  var badge = document.getElementById('favCountBadge');
+  if(badge) badge.textContent = state.favorites.length ? ' (' + state.favorites.length + ')' : '';
+  if(!state.favorites || state.favorites.length === 0){
+    content.innerHTML = '';
+    content.appendChild(emptyStateNode(
+      STAR_ICON.replace('viewBox="0 0 24 24"', 'viewBox="0 0 24 24" width="54" height="54"'),
+      'Touchez l\'étoile sur une recette pour la garder de côté et y revenir plus tard.'
+    ));
+    return;
+  }
+  var html = '';
+  state.favorites.forEach(function(r){ html += recipeCardHtml(r); });
+  content.innerHTML = html;
+}
+function switchRecipesTab(tab){
+  state.recipesTab = tab;
+  document.querySelectorAll('#recipesTabRow .chip').forEach(function(b){
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.getElementById('recipesContent').style.display = (tab === 'suggestions') ? '' : 'none';
+  document.getElementById('favoritesContent').style.display = (tab === 'favorites') ? '' : 'none';
+  if(tab === 'favorites') renderFavorites();
+}
+document.getElementById('recipesTabRow').addEventListener('click', function(e){
+  var chip = e.target.closest('.chip');
+  if(!chip) return;
+  switchRecipesTab(chip.dataset.tab);
+});
+document.getElementById('recipeCategorySelect').addEventListener('change', function(e){
+  state.recipeCategoryFilter = e.target.value;
+});
+document.getElementById('findRecipesBtn').addEventListener('click', function(){ fetchRecipesFromGemini(); });
+document.getElementById('recipesContent').addEventListener('click', function(e){
+  var starBtn = e.target.closest('.star-btn');
+  if(starBtn){ toggleFavorite(starBtn.dataset.id); return; }
+  var card = e.target.closest('.recipe-card');
+  if(!card) return;
+  openRecipeDetail(card.dataset.id);
+});
+document.getElementById('favoritesContent').addEventListener('click', function(e){
+  var starBtn = e.target.closest('.star-btn');
+  if(starBtn){ toggleFavorite(starBtn.dataset.id); return; }
+  var card = e.target.closest('.recipe-card');
+  if(!card) return;
+  openRecipeDetail(card.dataset.id);
+});
+
+
+/* =========================================================
+   GEMINI — ANALYSE DU GARDE-MANGER
+========================================================= */
+function buildAnalysisPrompt(pantry){
+  var compact = pantry.map(function(i){
+    var entry = { name:i.name, category:i.category || 'autres' };
+    entry.quantity = (i.unit === UNSPECIFIED_UNIT) ? 'disponible' : i.quantity;
+    if(i.unit !== UNSPECIFIED_UNIT) entry.unit = i.unit;
+    return entry;
+  });
+  return 'Tu es un assistant culinaire francophone qui établit le bilan d\'un garde-manger. Voici l\'inventaire actuel au format JSON :\n'
+    + JSON.stringify(compact)
+    + '\n\nDonne un avis concret et bienveillant sur ce garde-manger : ce qui est positif (diversité, bons produits de base, équilibre des catégories), '
+    + 'les catégories d\'aliments absentes ou sous-représentées pour cuisiner varié, les aliments présents en grande quantité qu\'il faudrait penser à utiliser bientôt, '
+    + 'et des suggestions concrètes de courses à faire pour compléter intelligemment ce garde-manger. Chaque point doit être une phrase courte et concrète, sans généralités.'
+    + '\n\nRéponds UNIQUEMENT avec un JSON valide respectant exactement ce schéma, sans aucun texte avant ou après :\n'
+    + '{"summary":string,"strengths":[string],"missing":[string],"excess":[string],"suggestions":[string]}';
+}
+function analysisEmptyState(){
+  document.getElementById('analysisContent').innerHTML = '';
+  document.getElementById('analysisContent').appendChild(emptyStateNode(
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M8.5 12.5h7M8.5 16h4.5"/></svg>',
+    'Lancez une analyse pour obtenir un avis détaillé sur votre garde-manger.'
+  ));
+}
+function setAnalysisLoading(isLoading){
+  var content = document.getElementById('analysisContent');
+  document.getElementById('analyzeBtn').disabled = isLoading;
+  if(isLoading){
+    content.innerHTML = '';
+    var box = document.createElement('div');
+    box.className = 'loading-box';
+    box.innerHTML = '<div class="spinner"></div><p>L\'IA analyse votre garde-manger…</p>';
+    content.appendChild(box);
+  }
+}
+function analysisBlock(title, items, color){
+  if(!items || items.length === 0) return '';
+  var lis = items.map(function(t){ return '<li style="margin-bottom:7px;">'+escapeHtml(t)+'</li>'; }).join('');
+  return '<div class="settings-block"><h3 style="color:'+color+';">'+title+'</h3>'
+    + '<ul style="margin:0; padding-left:18px; font-size:13.5px; line-height:1.55; color:var(--text);">'+lis+'</ul></div>';
+}
+function renderAnalysis(data){
+  var c = document.getElementById('analysisContent');
+  var html = '';
+  if(data.summary){
+    html += '<div class="settings-block"><h3>Résumé</h3><p class="desc" style="margin-bottom:0;">'+escapeHtml(data.summary)+'</p></div>';
+  }
+  html += analysisBlock('Points forts', data.strengths, '#2e6b34');
+  html += analysisBlock('Ce qui manque', data.missing, '#7a4f0c');
+  html += analysisBlock('À utiliser en priorité', data.excess, 'var(--danger)');
+  html += analysisBlock('Suggestions de courses', data.suggestions, '#2c5170');
+  if(!html){ analysisEmptyState(); return; }
+  c.innerHTML = html;
+}
+function fetchAnalysisFromGemini(){
+  if(!state.settings.geminiApiKey){
+    showToast('Ajoutez votre clé API Gemini dans Réglages');
+    switchScreen('settings');
+    return;
+  }
+  if(state.pantry.length === 0){
+    showToast('Ajoutez d\'abord des aliments à votre garde-manger');
+    return;
+  }
+  setAnalysisLoading(true);
+  var model = state.settings.geminiModel || 'gemini-2.5-flash';
+  var prompt = buildAnalysisPrompt(state.pantry);
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
+
+  fetch(url, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-goog-api-key': state.settings.geminiApiKey },
+    body: JSON.stringify({
+      contents:[{ role:'user', parts:[{text:prompt}] }],
+      generationConfig:{ responseMimeType:'application/json', temperature:0.7 }
+    })
+  })
+  .then(function(res){
+    if(!res.ok){
+      return res.text().then(function(){ throw new Error('Erreur API Gemini (' + res.status + ')'); });
+    }
+    return res.json();
+  })
+  .then(function(data){
+    if(data.promptFeedback && data.promptFeedback.blockReason){
+      throw new Error('Requête bloquée : ' + data.promptFeedback.blockReason);
+    }
+    var candidate = data.candidates && data.candidates[0];
+    if(!candidate){ throw new Error('Aucune réponse reçue du modèle'); }
+    var text = (candidate.content && candidate.content.parts || []).map(function(p){ return p.text || ''; }).join('');
+    var cleaned = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    var parsed = JSON.parse(cleaned);
+    renderAnalysis(parsed);
+  })
+  .catch(function(err){
+    console.error(err);
+    var content = document.getElementById('analysisContent');
+    content.innerHTML = '<div class="empty-state"><p>'+escapeHtml(err.message || 'Une erreur est survenue.')+'</p></div>';
+    showToast('Erreur lors de l\'analyse');
+  })
+  .finally(function(){
+    document.getElementById('analyzeBtn').disabled = false;
+  });
+}
+document.getElementById('analyzeBtn').addEventListener('click', fetchAnalysisFromGemini);
+
+/* =========================================================
+   DÉTAIL RECETTE
+========================================================= */
+function findPantryItem(name){
+  var n = normalize(name);
+  return state.pantry.find(function(i){ return normalize(i.name) === n; });
+}
+function openRecipeDetail(id){
+  var recipe = findRecipeById(id);
+  if(!recipe) return;
+  state.activeRecipeId = id;
+  if(typeof recipe.baseServings !== 'number' || recipe.baseServings <= 0){ recipe.baseServings = recipe.servings || 2; }
+  if(typeof recipe.servings !== 'number' || recipe.servings <= 0){ recipe.servings = recipe.baseServings; }
+  recipe.ingredients = (recipe.ingredients||[]).map(function(ing){
+    if(typeof ing._removed === 'undefined') ing._removed = false;
+    if(typeof ing.baseQuantity !== 'number') ing.baseQuantity = ing.quantity;
+    return ing;
+  });
+  renderRecipeDetail(recipe);
+  switchScreen('recipe-detail');
+}
+function renderRecipeDetail(recipe){
+  var c = document.getElementById('recipeDetailContent');
+  var fav = isFavorited(recipe.id);
+  var html = '<div class="detail-hero">'
+    + '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">'
+    + '<h2 style="flex:1;">'+escapeHtml(recipe.title)+'</h2>'
+    + '<button type="button" class="star-btn'+(fav?' active':'')+'" id="detailFavBtn" aria-label="Favori">'+STAR_ICON+'</button>'
+    + '</div>'
+    + '<p>'+escapeHtml(recipe.description||'')+'</p>'
+    + '<div class="recipe-tags">'
+    + (recipe.time_minutes ? '<span class="tag">'+recipe.time_minutes+' min</span>' : '')
+    + (recipe.difficulty ? '<span class="tag diff-'+escapeHtml(recipe.difficulty)+'">'+escapeHtml(recipe.difficulty)+'</span>' : '')
+    + '</div>'
+    + '<div class="servings-adjust">'
+    + '<span>Portions</span>'
+    + '<div class="stepper">'
+    + '<button data-action="servings-dec" aria-label="Moins de portions">−</button>'
+    + '<span class="val">'+recipe.servings+' pers.</span>'
+    + '<button data-action="servings-inc" aria-label="Plus de portions">+</button>'
+    + '</div></div>'
+    + '</div>';
+
+  html += '<div class="section-title">Ingrédients utilisés</div>';
+  var visibleIngs = recipe.ingredients.filter(function(i){ return !i._removed; });
+  if(visibleIngs.length === 0){
+    html += '<p class="helper">Tous les ingrédients ont été retirés de cette recette.</p>';
+  }
+  visibleIngs.forEach(function(ing, idx){
+    var realIdx = recipe.ingredients.indexOf(ing);
+    var pantryItem = findPantryItem(ing.name);
+    var warn = '';
+    if(pantryItem && pantryItem.unit !== UNSPECIFIED_UNIT && Number(ing.quantity) > Number(pantryItem.quantity)){
+      warn = '<span class="warn">Quantité supérieure au stock ('+formatQty(pantryItem.quantity)+' '+escapeHtml(pantryItem.unit)+' disponible)</span>';
+    } else if(!pantryItem){
+      warn = '<span class="warn">Cet aliment n\'est plus dans votre garde-manger</span>';
+    }
+    html += '<div class="ing-row">'
+      + '<div class="name">'+escapeHtml(ing.name)+warn+'</div>'
+      + '<div class="stepper">'
+      + '<button data-action="dec" data-idx="'+realIdx+'">−</button>'
+      + '<span class="val">'+formatQty(ing.quantity)+' '+escapeHtml(ing.unit)+'</span>'
+      + '<button data-action="inc" data-idx="'+realIdx+'">+</button>'
+      + '</div>'
+      + '<button class="icon-btn danger" data-action="remove" data-idx="'+realIdx+'" aria-label="Retirer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+      + '</div>';
+  });
+
+  html += '<div class="section-title" style="margin-top:18px;">Préparation</div>';
+  html += '<ol class="steps-list">';
+  (recipe.steps||[]).forEach(function(step){
+    html += '<li><span>'+escapeHtml(step)+'</span></li>';
+  });
+  html += '</ol>';
+
+  html += '<div class="detail-actions">'
+    + '<button class="btn btn-primary btn-block" id="cookedBtn">J\'ai cuisiné ce plat</button>'
+    + '</div>';
+
+  c.innerHTML = html;
+
+  var favBtn = document.getElementById('detailFavBtn');
+  if(favBtn) favBtn.addEventListener('click', function(){ toggleFavorite(recipe.id); });
+
+  c.querySelectorAll('[data-action]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var action = btn.dataset.action;
+      if(action === 'servings-inc' || action === 'servings-dec'){
+        adjustServings(recipe, action === 'servings-inc' ? 1 : -1);
+        return;
+      }
+      var idx = parseInt(btn.dataset.idx, 10);
+      var ing = recipe.ingredients[idx];
+      if(!ing) return;
+      if(action === 'inc'){
+        ing.quantity = Math.round((Number(ing.quantity) + stepFor(ing.unit)) * 100) / 100;
+      } else if(action === 'dec'){
+        ing.quantity = Math.max(0, Math.round((Number(ing.quantity) - stepFor(ing.unit)) * 100) / 100);
+      } else if(action === 'remove'){
+        ing._removed = true;
+      }
+      renderRecipeDetail(recipe);
+    });
+  });
+
+  var cookedBtn = document.getElementById('cookedBtn');
+  if(cookedBtn){
+    cookedBtn.addEventListener('click', function(){
+      showConfirm({
+        title:'Confirmer la préparation',
+        message:'Les quantités utilisées seront déduites de votre garde-manger.',
+        confirmLabel:'Confirmer',
+        danger:false
+      }, function(){ applyRecipeToPantry(recipe); });
+    });
+  }
+}
+function adjustServings(recipe, delta){
+  var current = recipe.servings || recipe.baseServings || 2;
+  var newServings = Math.max(1, current + delta);
+  if(newServings === current) return;
+  recipe.servings = newServings;
+  var base = recipe.baseServings || 1;
+  var ratio = newServings / base;
+  recipe.ingredients.forEach(function(ing){
+    var baseQty = (typeof ing.baseQuantity === 'number') ? ing.baseQuantity : ing.quantity;
+    ing.quantity = Math.round(baseQty * ratio * 100) / 100;
+  });
+  renderRecipeDetail(recipe);
+}
+function stepFor(unit){
+  if(unit === 'pièce' || unit === 'tranche' || unit === 'paquet' || unit === 'botte') return 1;
+  if(unit === 'kg' || unit === 'L') return 0.1;
+  return 10;
+}
+function applyRecipeToPantry(recipe){
+  var used = [];
+  recipe.ingredients.filter(function(i){ return !i._removed; }).forEach(function(ing){
+    var item = findPantryItem(ing.name);
+    if(item){
+      if(item.unit !== UNSPECIFIED_UNIT){
+        item.quantity = Math.max(0, Math.round((Number(item.quantity) - Number(ing.quantity)) * 100) / 100);
+      }
+      used.push(ing.name);
+    }
+  });
+  persistPantry();
+  state.recipes = state.recipes.filter(function(r){ return r.id !== recipe.id; });
+  var favIndex = state.favorites.findIndex(function(r){ return r.id === recipe.id; });
+  if(favIndex !== -1){ state.favorites.splice(favIndex, 1); persistFavorites(); }
+  renderPantry();
+  renderRecipes();
+  renderFavorites();
+  switchScreen('pantry');
+  showToast('Garde-manger mis à jour après la préparation');
+}
+
+/* =========================================================
+   RÉGLAGES — GEMINI
+========================================================= */
+function syncSettingsFields(){
+  document.getElementById('geminiKeyInput').value = state.settings.geminiApiKey || '';
+  document.getElementById('geminiModelInput').value = state.settings.geminiModel || DEFAULT_SETTINGS.geminiModel;
+  document.getElementById('fbConfigInput').value = state.settings.firebaseConfig || '';
+  if(state.settings.householdCode){
+    document.getElementById('fbCodeDisplay').textContent = state.settings.householdCode;
+    document.getElementById('fbHouseholdSection').style.display = '';
+  }
+}
+document.getElementById('toggleKeyVisibility').addEventListener('click', function(){
+  var inp = document.getElementById('geminiKeyInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+});
+document.getElementById('saveGeminiSettings').addEventListener('click', function(){
+  state.settings.geminiApiKey = document.getElementById('geminiKeyInput').value.trim();
+  state.settings.geminiModel = document.getElementById('geminiModelInput').value.trim() || DEFAULT_SETTINGS.geminiModel;
+  persistSettings();
+  showToast('Réglages IA enregistrés');
+});
+
+/* =========================================================
+   FIREBASE — FOYER PARTAGÉ
+========================================================= */
+var FB_COLLECTION = 'households';
+var fbSyncTimer = null;
+
+function generateHouseholdCode(){
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for(var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function setFbStatusUI(status, label){
+  var pill = document.getElementById('fbStatusPill');
+  var lbl  = document.getElementById('fbSyncLabel');
+  if(status === 'connected'){
+    pill.textContent = 'Connecté'; pill.className = 'status-pill status-ok';
+  } else if(status === 'syncing'){
+    pill.textContent = 'Synchronisation…'; pill.className = 'status-pill status-off';
+  } else {
+    pill.textContent = 'Non connecté'; pill.className = 'status-pill status-off';
+  }
+  if(lbl) lbl.textContent = label || '';
+}
+
+function initFirebase(configStr, code){
+  var config;
+  try{
+    config = (typeof configStr === 'string') ? JSON.parse(configStr) : configStr;
+  } catch(e){
+    showToast('Configuration Firebase invalide (JSON malformé)');
+    return;
+  }
+  try{
+    if(state.fbUnsubscribe) state.fbUnsubscribe();
+    if(state.fbApp){
+      try{ state.fbApp.delete(); } catch(e2){}
+    }
+    var appName = 'garde-manger-' + Date.now();
+    state.fbApp = firebase.initializeApp(config, appName);
+    state.fbDb  = firebase.firestore(state.fbApp);
+    setFbStatusUI('connected', 'Foyer : ' + code);
+    document.getElementById('fbHouseholdSection').style.display = '';
+    document.getElementById('fbCodeDisplay').textContent = code;
+    state.settings.householdCode = code;
+    state.settings.firebaseConfig = typeof configStr === 'string' ? configStr : JSON.stringify(configStr);
+    persistSettings();
+    startFbListener(code);
+    showToast('Connecté au foyer ' + code);
+  } catch(e){
+    console.error('Firebase init error', e);
+    showToast('Erreur Firebase : ' + (e.message || e));
+    setFbStatusUI('off');
+  }
+}
+
+function startFbListener(code){
+  if(state.fbUnsubscribe){ state.fbUnsubscribe(); state.fbUnsubscribe = null; }
+  var docRef = state.fbDb.collection(FB_COLLECTION).doc(code);
+  state.fbUnsubscribe = docRef.onSnapshot(function(snap){
+    if(!snap.exists || state.fbSyncPending) return;
+    var data = snap.data();
+    if(!data) return;
+    state.fbSyncingFromRemote = true;
+    var pantry    = Array.isArray(data.pantry)    ? data.pantry.map(normalizePantryItem) : state.pantry;
+    var favorites = Array.isArray(data.favorites) ? data.favorites                       : state.favorites;
+    var changed = JSON.stringify(pantry) !== JSON.stringify(state.pantry)
+               || JSON.stringify(favorites) !== JSON.stringify(state.favorites);
+    if(changed){
+      state.pantry    = pantry;
+      state.favorites = favorites;
+      try{ localStorage.setItem('gm_pantry',    JSON.stringify(state.pantry));    }catch(e){}
+      try{ localStorage.setItem('gm_favorites', JSON.stringify(state.favorites)); }catch(e){}
+      renderPantry();
+      renderRecipes();
+      renderFavorites();
+      setFbStatusUI('connected', 'Foyer : ' + code + ' · mis à jour');
+    }
+    state.fbSyncingFromRemote = false;
+  }, function(err){
+    console.warn('Firestore listener error', err);
+    setFbStatusUI('off', 'Erreur de synchronisation');
+  });
+}
+
+function scheduleFbSync(){
+  if(!state.fbDb || !state.settings.householdCode || state.fbSyncingFromRemote) return;
+  clearTimeout(fbSyncTimer);
+  fbSyncTimer = setTimeout(pushToFirestore, 1800);
+}
+
+function pushToFirestore(){
+  if(!state.fbDb || !state.settings.householdCode) return;
+  state.fbSyncPending = true;
+  setFbStatusUI('syncing');
+  var code = state.settings.householdCode;
+  state.fbDb.collection(FB_COLLECTION).doc(code).set({
+    pantry    : state.pantry,
+    favorites : state.favorites,
+    updatedAt : firebase.firestore.FieldValue.serverTimestamp()
+  }).then(function(){
+    state.fbSyncPending = false;
+    setFbStatusUI('connected', 'Foyer : ' + code + ' · synchronisé');
+  }).catch(function(e){
+    state.fbSyncPending = false;
+    console.warn('Firestore write error', e);
+    setFbStatusUI('off', 'Erreur d\'écriture');
+  });
+}
+
+function connectToHousehold(code){
+  code = code.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+  if(code.length !== 6){ showToast('Code invalide — 6 caractères attendus'); return; }
+  var cfgStr = document.getElementById('fbConfigInput').value.trim() || state.settings.firebaseConfig;
+  if(!cfgStr){ showToast('Renseignez d\'abord la configuration Firebase'); return; }
+
+  var docRef;
+  try{
+    var cfg = JSON.parse(cfgStr);
+    if(state.fbApp) try{ state.fbApp.delete(); }catch(e2){}
+    state.fbApp = firebase.initializeApp(cfg, 'gm-check-' + Date.now());
+    docRef = firebase.firestore(state.fbApp).collection(FB_COLLECTION).doc(code);
+  } catch(e){ showToast('Configuration Firebase invalide'); return; }
+
+  docRef.get().then(function(snap){
+    if(snap.exists){
+      var data = snap.data();
+      showConfirm({
+        title:'Rejoindre le foyer ' + code + ' ?',
+        message:'Ce foyer contient ' + ((data.pantry||[]).length) + ' aliment(s). Voulez-vous remplacer vos données locales par celles du foyer, ou pousser vos données locales vers ce foyer ?',
+        confirmLabel:'Charger depuis le foyer',
+        danger:false
+      }, function(){
+        initFirebase(cfgStr, code);
+      });
+    } else {
+      showConfirm({
+        title:'Créer le foyer ' + code + ' ?',
+        message:'Ce code n\'existe pas encore. Vos données locales seront envoyées sur ce foyer. Les autres membres pourront vous rejoindre avec ce code.',
+        confirmLabel:'Créer',
+        danger:false
+      }, function(){
+        initFirebase(cfgStr, code);
+        pushToFirestore();
+      });
+    }
+  }).catch(function(e){
+    showToast('Impossible de joindre Firebase : ' + (e.message||''));
+  });
+}
+
+document.getElementById('fbConnectBtn').addEventListener('click', function(){
+  var cfgStr = document.getElementById('fbConfigInput').value.trim();
+  if(!cfgStr){ showToast('Collez d\'abord la configuration Firebase'); return; }
+  var code = state.settings.householdCode || generateHouseholdCode();
+  connectToHousehold(code);
+});
+
+document.getElementById('fbCopyCodeBtn').addEventListener('click', function(){
+  var code = state.settings.householdCode;
+  if(!code) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(function(){ showToast('Code copié : ' + code); });
+  } else {
+    showToast('Code : ' + code);
+  }
+});
+
+document.getElementById('fbNewHouseholdBtn').addEventListener('click', function(){
+  showConfirm({
+    title:'Créer un nouveau foyer ?',
+    message:'Un nouveau code sera généré. Vos données locales seront envoyées sur ce nouveau foyer.',
+    confirmLabel:'Créer',
+    danger:false
+  }, function(){
+    var cfgStr = document.getElementById('fbConfigInput').value.trim() || state.settings.firebaseConfig;
+    if(!cfgStr){ showToast('Configuration Firebase manquante'); return; }
+    var code = generateHouseholdCode();
+    initFirebase(cfgStr, code);
+    pushToFirestore();
+  });
+});
+
+document.getElementById('fbJoinBtn').addEventListener('click', function(){
+  var code = prompt('Entrez le code du foyer (6 caractères) :');
+  if(code) connectToHousehold(code.trim());
+});
+
+/* =========================================================
+   EXPORT / IMPORT JSON LOCAL
+========================================================= */
+document.getElementById('exportJsonBtn').addEventListener('click', function(){
+  var payload = JSON.stringify({ pantry: state.pantry, favorites: state.favorites, exportedAt: new Date().toISOString() }, null, 2);
+  var blob = new Blob([payload], { type:'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'garde-manger-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Export JSON téléchargé');
+});
+document.getElementById('importJsonBtn').addEventListener('click', function(){
+  document.getElementById('importJsonFile').click();
+});
+document.getElementById('importJsonFile').addEventListener('change', function(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(reader.result);
+      var pantry = Array.isArray(data) ? data : data.pantry;
+      var favorites = Array.isArray(data.favorites) ? data.favorites : [];
+      if(!Array.isArray(pantry)) throw new Error('Format invalide');
+      showConfirm({
+        title:'Remplacer votre garde-manger ?',
+        message:'Le fichier importé remplacera votre garde-manger et vos recettes favorites actuels.',
+        confirmLabel:'Remplacer',
+        danger:true
+      }, function(){
+        state.pantry = pantry.map(normalizePantryItem);
+        state.favorites = favorites;
+        persistPantry();
+        persistFavorites();
+        renderPantry();
+        renderRecipes();
+        renderFavorites();
+        switchScreen('pantry');
+        showToast('Garde-manger importé');
+      });
+    }catch(err){
+      showToast('Fichier JSON invalide');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* =========================================================
+   INITIALISATION
+========================================================= */
+function init(){
+  fillSelectOptions();
+  loadFromStorage();
+  syncSettingsFields();
+  renderPantry();
+  renderLibrary();
+  renderRecipes();
+  renderFavorites();
+  analysisEmptyState();
+  switchScreen('pantry');
+
+  // Auto-connexion Firebase si déjà configuré
+  if(state.settings.firebaseConfig && state.settings.householdCode){
+    setTimeout(function(){
+      try{
+        initFirebase(state.settings.firebaseConfig, state.settings.householdCode);
+      } catch(e){ console.warn('Firebase auto-init failed', e); }
+    }, 800);
+  }
+}
+init();
+
+})();
+</script>
+</body>
+</html>
